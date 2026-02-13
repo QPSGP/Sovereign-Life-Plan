@@ -8,7 +8,7 @@ Your `DATABASE_URL` is set in **Vercel**, not on your machine. To create the tab
 2. Go to **Settings** → **Secrets and variables** → **Actions**
 3. Click **New repository secret**
 4. **Name:** `DATABASE_URL`
-5. **Value:** Paste the same Postgres connection string you use in Vercel (from Vercel project → Storage → your Postgres DB → connection string, or from Neon/Supabase).
+5. **Value:** Paste the **raw** connection string only. It must start with `postgresql://` or `postgres://` (example: `postgresql://user:pass@host.vercel-storage.com/db?sslmode=require`). Do **not** wrap it in quotes or add spaces. Get it from Vercel (Storage → your Postgres DB → connection string) or Neon/Supabase.
 6. Click **Add secret**
 
 ## 2. Run the workflow
