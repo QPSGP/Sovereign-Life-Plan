@@ -1,8 +1,25 @@
 # Run DB push and seed (without using your PC)
 
-Your `DATABASE_URL` is set in **Vercel**, not on your machine. To create the tables and seed plans **once**, use GitHub Actions.
+Your `DATABASE_URL` is set in **Vercel**, not on your machine. Use GitHub Actions to create/update tables and (optionally) seed plans.
 
-## 1. Add `DATABASE_URL` to GitHub secrets
+---
+
+## Run the workflow again (e.g. after schema changes)
+
+When you add new columns or tables (e.g. `passwordHash` for member login), run the workflow **again** so the database is updated.
+
+1. Open: **https://github.com/QPSGP/Sovereign-Life-Plan/actions**
+2. In the **left sidebar**, click **“DB push and seed”**.
+3. On the right, click the **“Run workflow”** dropdown (gray button).
+4. Leave the branch as **main** (or your default branch), then click the green **“Run workflow”** button.
+5. Wait until the run appears at the top and shows a **green checkmark** (about 1–2 minutes).  
+   - If it fails (red X), open the run, click the **“db”** job, and check the log for errors.
+
+After it succeeds, your database has the latest schema (e.g. the `passwordHash` column on `members`). You do **not** need to add secrets again if `DATABASE_URL` is already set.
+
+---
+
+## First-time setup: Add `DATABASE_URL` to GitHub secrets
 
 1. Open your repo: **https://github.com/QPSGP/Sovereign-Life-Plan**
 2. Go to **Settings** → **Secrets and variables** → **Actions**
