@@ -31,7 +31,7 @@ No Stripe or crypto keys are required for the app to build and run; add them whe
 - [ ] **Apply schema once** (from any machine with Node + this repo):
   - Set `DATABASE_URL` in `.env` (or in the environment).
   - Run: `npx prisma generate` then `npx prisma db push`.
-- [ ] (Optional) Seed subscription plans from `docs/tiers.md` when you add that script.
+- [ ] **Seed subscription plans** (optional): `npm run db:seed` to insert Basic, Standard, Premium, Sovereign tiers.
 
 ### 3. Environment variables (for Vercel or local)
 
