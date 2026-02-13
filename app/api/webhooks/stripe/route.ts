@@ -2,20 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
 // Stripe webhook: verify signature and update payments + subscription status.
-// Set STRIPE_WEBHOOK_SECRET in Vercel to the webhook signing secret.
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
-  apiVersion: "2025-02-24.acacia",
-});
+// Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in Vercel.
+// Stripe is initialized at request time so build does not require env vars.
 
 export async function POST(req: NextRequest) {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  const apiKey = process.env.STRIPE_SECRET_KEY;
+  if (!apiKey || !secret) {
+    return NextResponse.json(
+      { error: "Stripe not configured (missing STRIPE_SECRET_KEY or STRIPE_WEBHOOK_SECRET)" },
+      { status: 503 }
+    );
+  }
+
+  const stripe = new Stripe(apiKey, { apiVersion: "2025-02-24.acacia" });
+
   const body = await req.text();
   const sig = req.headers.get("stripe-signature");
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
-
-  if (!secret || !sig) {
+  if (!sig) {
     return NextResponse.json(
-      { error: "Missing Stripe webhook secret or signature" },
+      { error: "Missing Stripe signature header" },
       { status: 400 }
     );
   }
