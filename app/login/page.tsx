@@ -15,6 +15,11 @@ export default async function MemberLoginPage({
         <p className="text-sm text-neutral-400 mb-4">Sign in to view your subscription and account.</p>
         {error === "invalid" && <p className="text-amber-500 text-sm mb-2">Invalid email or password.</p>}
         {error === "missing" && <p className="text-amber-500 text-sm mb-2">Email and password required.</p>}
+        {error === "server" && (
+          <p className="text-amber-500 text-sm mb-2">
+            Server error. Run the &quot;DB push and seed&quot; workflow in GitHub Actions once to add the password column, then have admin set a password for your account.
+          </p>
+        )}
         <form action="/api/auth/member" method="POST" className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm text-neutral-400 mb-1">Email</label>
