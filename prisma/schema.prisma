@@ -26,22 +26,23 @@ model User {
 
 // ----- Members (subscribers) -----
 model Member {
-  id          String   @id @default(cuid())
-  email       String
-  firstName   String?
-  lastName    String?
-  title       String?
-  company     String?
-  street      String?
-  city        String?
-  state       String?
-  zip         String?
-  country     String?
-  phone       String?
-  fax         String?
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  email        String
+  passwordHash String?  // for member portal login
+  firstName    String?
+  lastName     String?
+  title        String?
+  company      String?
+  street       String?
+  city         String?
+  state        String?
+  zip          String?
+  country      String?
+  phone        String?
+  fax          String?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   categories    MemberCategory[]
   subscriptions Subscription[]

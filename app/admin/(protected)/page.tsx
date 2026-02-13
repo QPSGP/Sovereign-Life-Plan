@@ -103,11 +103,12 @@ export default async function AdminPage() {
           ) : (
             <ul className="space-y-2">
               {members.map((m) => (
-                <li key={m.id} className="flex items-center gap-4 py-2 px-3 rounded bg-neutral-900 text-sm">
+                <li key={m.id} className="flex flex-wrap items-center gap-2 py-2 px-3 rounded bg-neutral-900 text-sm">
                   <span>{m.firstName ?? ""} {m.lastName ?? ""}</span>
                   <span className="text-neutral-400">{m.email}</span>
                   {m.company && <span className="text-neutral-500">{m.company}</span>}
                   <AddSubscriptionForm memberId={m.id} plans={plans} />
+                  <SetPasswordForm memberId={m.id} />
                 </li>
               ))}
             </ul>
@@ -134,6 +135,15 @@ function AddSubscriptionForm({ memberId, plans }: { memberId: string; plans: { i
         ))}
       </select>
       <button type="submit" className="rounded bg-emerald-700 px-2 py-1 text-xs text-white hover:bg-emerald-600">Add plan</button>
+    </form>
+  );
+}
+
+function SetPasswordForm({ memberId }: { memberId: string }) {
+  return (
+    <form action={`/api/members/${memberId}/password`} method="POST" className="flex items-center gap-2">
+      <input type="password" name="password" placeholder="Portal password" minLength={6} className="rounded bg-neutral-800 px-2 py-1 text-sm text-white border border-neutral-700 w-32" title="Min 6 characters" />
+      <button type="submit" className="rounded bg-neutral-700 px-2 py-1 text-xs text-white hover:bg-neutral-600">Set password</button>
     </form>
   );
 }

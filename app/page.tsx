@@ -8,7 +8,10 @@ export default function Home() {
       <p className="mt-6 text-sm text-neutral-500">
         API: <code className="rounded bg-neutral-800 px-1.5 py-0.5">/api/health</code>
       </p>
-      <a href="/admin" className="mt-4 text-sm text-neutral-400 hover:text-white underline">Admin dashboard →</a>
+      <div className="mt-4 flex gap-6">
+        <a href="/login" className="text-sm text-neutral-400 hover:text-white underline">Member portal →</a>
+        <a href="/admin" className="text-sm text-neutral-400 hover:text-white underline">Admin dashboard →</a>
+      </div>
     </main>
   );
 }

@@ -28,9 +28,10 @@ No Stripe or crypto keys are required for the app to build and run; add them whe
 
 - [ ] **Create** a Postgres database (Vercel Postgres, Neon, or Supabase).
 - [ ] **Copy** the connection string (must include `?sslmode=require` for serverless).
-- [ ] **Apply schema once** (from any machine with Node + this repo):
+- [ ] **Apply schema once** (from any machine with Node + this repo, or GitHub Action “DB push and seed”):
   - Set `DATABASE_URL` in `.env` (or in the environment).
   - Run: `npx prisma generate` then `npx prisma db push`.
+  - After schema changes (e.g. new columns like `Member.passwordHash`), run `db push` again.
 - [ ] **Seed subscription plans** (optional): `npm run db:seed` to insert Basic, Standard, Premium, Sovereign tiers.
 
 ### 3. Environment variables (for Vercel or local)
