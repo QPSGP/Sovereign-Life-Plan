@@ -1,0 +1,210 @@
+// Sovereign Life Plan — Prisma schema
+// DB: PostgreSQL (Vercel Postgres / Neon / Supabase)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----- Staff (admin) users -----
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  passwordHash String
+  firstName String?
+  lastName  String?
+  role      String   @default("agent") // admin | agent
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+// ----- Members (subscribers) -----
+model Member {
+  id          String   @id @default(cuid())
+  email       String
+  firstName   String?
+  lastName    String?
+  title       String?
+  company     String?
+  street      String?
+  city        String?
+  state       String?
+  zip         String?
+  country     String?
+  phone       String?
+  fax         String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  categories    MemberCategory[]
+  subscriptions Subscription[]
+  orders        Order[]
+  invoices      Invoice[]
+  memberPlans   MemberPlan[]
+  communications Communication[]
+
+  @@map("members")
+}
+
+model MemberCategory {
+  id        String   @id @default(cuid())
+  memberId  String
+  category  String   // e.g. "Personal", "MMPE4"
+  createdAt DateTime @default(now())
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, category])
+  @@map("member_categories")
+}
+
+// ----- Subscription plans (tiers) -----
+model SubscriptionPlan {
+  id          String   @id @default(cuid())
+  name        String   // Basic, Standard, Premium, Sovereign
+  slug        String   @unique
+  amountCents Int      // price in USD cents
+  interval    String   // "monthly" | "yearly"
+  features    Json?    // { "basic_plan_view": true, "full_plan_edit": true, ... }
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subscriptions Subscription[]
+}
+
+// ----- Per-member subscription -----
+model Subscription {
+  id                String   @id @default(cuid())
+  memberId          String
+  subscriptionPlanId String
+  status            String   // trial | active | past_due | canceled
+  startedAt         DateTime @default(now())
+  currentPeriodEnd  DateTime
+  canceledAt        DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  member   Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  plan     SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id])
+
+  @@map("subscriptions")
+}
+
+// ----- Orders (order header) -----
+model Order {
+  id        String   @id @default(cuid())
+  memberId  String
+  orderNumber String? // human-readable
+  totalCents Int     @default(0)
+  status    String   @default("pending") // pending | paid | canceled
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  member      Member      @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  orderLines  OrderLine[]
+}
+
+model OrderLine {
+  id         String   @id @default(cuid())
+  orderId    String
+  type       String?  // e.g. subscription, one-time
+  item       String?
+  unitCents  Int      @default(0)
+  quantity   Int      @default(1)
+  totalCents Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("order_lines")
+}
+
+// ----- Invoices -----
+model Invoice {
+  id          String    @id @default(cuid())
+  memberId    String
+  invoiceNumber String?
+  amountCents   Int     // in USD cents
+  dueDate      DateTime
+  status       String   @default("open") // open | paid | past_due | canceled
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  member   Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  payments Payment[]
+}
+
+// ----- Payments (fiat + crypto) -----
+model Payment {
+  id                 String   @id @default(cuid())
+  invoiceId          String
+  amountCents        Int      // recorded in USD cents for balance
+  currencyType       String   // "fiat" | "crypto"
+  currencyCode       String   // "USD" | "BTC" | "ETH" | "USDC" etc.
+  paymentProvider    String   // "stripe" | "coinbase_commerce" | "nowpayments"
+  providerPaymentId  String?  @unique // idempotency + reconciliation
+  providerInvoiceId  String?
+  paidAt             DateTime @default(now())
+  createdAt         DateTime @default(now())
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+// ----- Member life plans (areas of purpose, tasks) -----
+model MemberPlan {
+  id                    String   @id @default(cuid())
+  memberId              String
+  subjectBusiness       String?  // Agency, Public, etc.
+  areasOfPurpose        String?
+  areasOfResponsibility String?
+  sortOrder             Int      @default(0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  member Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  tasks  MemberPlanTask[]
+}
+
+model MemberPlanTask {
+  id           String   @id @default(cuid())
+  memberPlanId String
+  verb         String?
+  noun         String?
+  object       String?
+  comment      String?
+  objective    String?
+  results      String?
+  done         Boolean  @default(false)
+  doneAt       DateTime?
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberPlan MemberPlan @relation(fields: [memberPlanId], references: [id], onDelete: Cascade)
+
+  @@map("member_plan_tasks")
+}
+
+// ----- Communications (calls, mailouts) -----
+model Communication {
+  id        String   @id @default(cuid())
+  memberId  String
+  type      String   // "call" | "mailout" | "email"
+  subject   String?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@map("communications")
+}
