@@ -8,6 +8,7 @@ export default async function AdminPage() {
   let members: { id: string; email: string; firstName: string | null; lastName: string | null; company: string | null }[] = [];
   let dbError = false;
 
+  let dbErrorDetail: string | null = null;
   if (process.env.DATABASE_URL) {
     try {
       [plans, members] = await Promise.all([
@@ -18,8 +19,9 @@ export default async function AdminPage() {
           select: { id: true, email: true, firstName: true, lastName: true, company: true },
         }),
       ]);
-    } catch {
+    } catch (e) {
       dbError = true;
+      dbErrorDetail = e instanceof Error ? e.message : String(e);
     }
   }
 
@@ -35,7 +37,11 @@ export default async function AdminPage() {
           <p className="text-amber-500 mb-6">Database not configured. Set DATABASE_URL in Vercel.</p>
         )}
         {dbError && (
-          <p className="text-amber-500 mb-6">Database error. Run &quot;npx prisma db push&quot; to create tables.</p>
+          <div className="text-amber-500 mb-6 space-y-2">
+            <p className="font-medium">Database error — tables may not exist yet.</p>
+            <p className="text-sm">Run the GitHub Action to create them: repo → <strong>Actions</strong> → <strong>DB push and seed</strong> → <strong>Run workflow</strong>. Add <code className="bg-neutral-800 px-1">DATABASE_URL</code> under Settings → Secrets and variables → Actions first.</p>
+            <p className="text-xs text-neutral-500 mt-2">Details: {dbErrorDetail ?? "unknown"}</p>
+          </div>
         )}
 
         <section className="mb-10">
