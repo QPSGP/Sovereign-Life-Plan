@@ -9,17 +9,41 @@ export default async function AdminLifePlanPage({
   searchParams: Promise<{ userId?: string; error?: string }>;
 }) {
   const { userId: selectedUserId, error } = await searchParams;
-  const users = await prisma.user.findMany({
-    orderBy: { email: "asc" },
-    select: { id: true, email: true, firstName: true, lastName: true },
-  });
-  const subjectBusinesses = selectedUserId
-    ? await prisma.subjectBusiness.findMany({
+
+  if (!process.env.DATABASE_URL) {
+    return (
+      <main className="min-h-screen bg-neutral-950 text-neutral-100 p-6">
+        <div className="max-w-2xl mx-auto">
+          <header className="flex items-center justify-between border-b border-neutral-800 pb-4 mb-6">
+            <h1 className="text-2xl font-semibold">Life Plan</h1>
+            <Link href="/admin" className="text-neutral-400 hover:text-white text-sm">← Admin</Link>
+          </header>
+          <p className="text-amber-500">Database not configured. Set DATABASE_URL in your environment (e.g. Vercel).</p>
+        </div>
+      </main>
+    );
+  }
+
+  let users: { id: string; email: string; firstName: string | null; lastName: string | null }[] = [];
+  let subjectBusinesses: { id: string; name: string }[] = [];
+  let dbError: string | null = null;
+
+  try {
+    users = await prisma.user.findMany({
+      orderBy: { email: "asc" },
+      select: { id: true, email: true, firstName: true, lastName: true },
+    });
+    if (selectedUserId) {
+      subjectBusinesses = await prisma.subjectBusiness.findMany({
         where: { userId: selectedUserId },
         orderBy: { sortOrder: "asc" },
         select: { id: true, name: true },
-      })
-    : [];
+      });
+    }
+  } catch (e) {
+    dbError = e instanceof Error ? e.message : String(e);
+    console.error("Life Plan page DB error:", e);
+  }
 
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-100 p-6">
@@ -31,6 +55,13 @@ export default async function AdminLifePlanPage({
 
         {error === "missing" && <p className="text-amber-500 text-sm mb-4">Name and user are required.</p>}
         {error === "create" && <p className="text-amber-500 text-sm mb-4">Failed to create.</p>}
+        {dbError && (
+          <div className="mb-4 p-4 rounded bg-red-950/50 border border-red-800 text-red-200 text-sm">
+            <p className="font-medium">Database error</p>
+            <p className="mt-1 break-all">{dbError}</p>
+            <p className="mt-2 text-red-300/80">Run &quot;DB push and seed&quot; (GitHub Action or <code className="bg-neutral-800 px-1">npx prisma db push</code>) so the schema matches the database.</p>
+          </div>
+        )}
 
         <section className="mb-8">
           <h2 className="text-lg font-medium text-neutral-300 mb-3">User (plan owner)</h2>
