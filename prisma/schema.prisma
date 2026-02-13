@@ -12,16 +12,82 @@ datasource db {
 
 // ----- Staff (admin) users -----
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id           String   @id @default(cuid())
+  email        String   @unique
   passwordHash String
-  firstName String?
-  lastName  String?
-  role      String   @default("agent") // admin | agent
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  firstName    String?
+  lastName     String?
+  role         String   @default("agent") // admin | agent
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  subjectBusinesses SubjectBusiness[]
 
   @@map("users")
+}
+
+// ----- Life Plan hierarchy (User → Subject/Business → Area of Purpose → Areas of Responsibility → Physical movements) -----
+model SubjectBusiness {
+  id                String   @id @default(cuid())
+  userId            String
+  memberId          String?  // optional: link to member for portal display
+  name              String   // Subject/Business
+  sortOrder         Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user   User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  member Member?          @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  areasOfPurpose AreaOfPurpose[]
+
+  @@map("subject_business")
+}
+
+model AreaOfPurpose {
+  id                 String   @id @default(cuid())
+  subjectBusinessId  String
+  name               String
+  sortOrder          Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  subjectBusiness     SubjectBusiness       @relation(fields: [subjectBusinessId], references: [id], onDelete: Cascade)
+  areasOfResponsibility AreaOfResponsibility[]
+
+  @@map("area_of_purpose")
+}
+
+model AreaOfResponsibility {
+  id                String   @id @default(cuid())
+  areaOfPurposeId   String
+  name              String
+  sortOrder         Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  areaOfPurpose   AreaOfPurpose    @relation(fields: [areaOfPurposeId], references: [id], onDelete: Cascade)
+  physicalMovements PhysicalMovement[]
+
+  @@map("area_of_responsibility")
+}
+
+model PhysicalMovement {
+  id                     String    @id @default(cuid())
+  areaOfResponsibilityId String
+  verb                   String?   // e.g. use, create
+  noun                   String?
+  object                 String?   // or description
+  objective              String?
+  results                String?
+  done                   Boolean   @default(false)
+  doneAt                 DateTime?
+  sortOrder              Int       @default(0)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  areaOfResponsibility AreaOfResponsibility @relation(fields: [areaOfResponsibilityId], references: [id], onDelete: Cascade)
+
+  @@map("physical_movement")
 }
 
 // ----- Members (subscribers) -----
@@ -44,12 +110,13 @@ model Member {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  categories    MemberCategory[]
-  subscriptions Subscription[]
-  orders        Order[]
-  invoices      Invoice[]
-  memberPlans   MemberPlan[]
-  communications Communication[]
+  categories       MemberCategory[]
+  subscriptions    Subscription[]
+  orders           Order[]
+  invoices         Invoice[]
+  memberPlans      MemberPlan[]
+  communications   Communication[]
+  subjectBusinesses SubjectBusiness[]  // life plans linked to this member (optional)
 
   @@map("members")
 }
