@@ -35,7 +35,15 @@ export default async function AdminLifePlanPage({
         <section className="mb-8">
           <h2 className="text-lg font-medium text-neutral-300 mb-3">User (plan owner)</h2>
           {users.length === 0 ? (
-            <p className="text-neutral-500 text-sm">No users. Run &quot;DB push and seed&quot; to create the default admin user.</p>
+            <div className="text-neutral-300 space-y-2">
+              <p className="text-neutral-500 text-sm">No plan owners yet. Life Plan uses <strong>Users</strong> (not Members) as plan owners.</p>
+              <form action="/api/life-plan/seed-user" method="POST">
+                <button type="submit" className="rounded bg-emerald-700 px-4 py-2 text-sm text-white hover:bg-emerald-600">
+                  Create default plan owner (Admin User)
+                </button>
+              </form>
+              <p className="text-neutral-500 text-xs">This creates the same user as the seed: admin@sovereign-life-plan.local. You can add more users in the database if needed.</p>
+            </div>
           ) : (
             <>
               <form method="GET" className="flex gap-2 mb-4">

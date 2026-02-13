@@ -40,6 +40,8 @@ export default async function AdminPage() {
         <header className="flex items-center justify-between border-b border-neutral-800 pb-4 mb-8">
           <h1 className="text-2xl font-semibold">Sovereign Life Plan — Admin</h1>
           <div className="flex items-center gap-4">
+            <Link href="/admin/invoices" className="text-neutral-400 hover:text-white text-sm">Invoices</Link>
+            <Link href="/admin/communications" className="text-neutral-400 hover:text-white text-sm">Communications</Link>
             <Link href="/admin/life-plan" className="text-neutral-400 hover:text-white text-sm">Life Plan</Link>
             <Link href="/" className="text-neutral-400 hover:text-white text-sm">← Home</Link>
             <form action="/api/auth/admin/logout" method="POST">

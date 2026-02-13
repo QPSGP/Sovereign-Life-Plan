@@ -9,7 +9,7 @@ export default async function PortalPage() {
   const memberId = await getMemberIdFromCookie();
   if (!memberId) redirect("/login");
 
-  const [member, subscriptions, invoices] = await Promise.all([
+  const [member, subscriptions, invoices, subjectBusinesses] = await Promise.all([
     prisma.member.findUniqueOrThrow({
       where: { id: memberId },
       include: { categories: { select: { category: true } } },
@@ -24,6 +24,11 @@ export default async function PortalPage() {
       include: { payments: true },
       orderBy: { dueDate: "desc" },
       take: 20,
+    }),
+    prisma.subjectBusiness.findMany({
+      where: { memberId },
+      orderBy: { sortOrder: "asc" },
+      select: { id: true, name: true },
     }),
   ]);
 
@@ -66,6 +71,14 @@ export default async function PortalPage() {
             </ul>
           )}
         </section>
+
+        {subjectBusinesses.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-lg font-medium text-neutral-300 mb-3">My plan</h2>
+            <p className="text-neutral-500 text-sm mb-2">You have a life plan linked to your account.</p>
+            <Link href="/portal/plan" className="inline-block rounded bg-neutral-800 px-4 py-2 text-sm text-white hover:bg-neutral-700">View my plan →</Link>
+          </section>
+        )}
 
         <section className="mb-8">
           <h2 className="text-lg font-medium text-neutral-300 mb-3">Invoices & payments</h2>
