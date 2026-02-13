@@ -1,4 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcryptjs");
 const prisma = new PrismaClient();
 
 const defaultPlans = [
@@ -9,6 +10,21 @@ const defaultPlans = [
 ];
 
 async function main() {
+  const defaultUserEmail = "admin@sovereign-life-plan.local";
+  const defaultUserHash = await bcrypt.hash("changeme", 10);
+  await prisma.user.upsert({
+    where: { email: defaultUserEmail },
+    update: {},
+    create: {
+      email: defaultUserEmail,
+      passwordHash: defaultUserHash,
+      firstName: "Admin",
+      lastName: "User",
+      role: "admin",
+    },
+  });
+  console.log("Seeded default user (Life Plan owner):", defaultUserEmail);
+
   for (const plan of defaultPlans) {
     await prisma.subscriptionPlan.upsert({
       where: { slug: plan.slug },
