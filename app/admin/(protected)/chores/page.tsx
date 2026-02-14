@@ -4,12 +4,22 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default async function AdminChoresPage(props: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string }> | { error?: string };
 }) {
-  const { error } = await props.searchParams;
-  const chores = await prisma.chore.findMany({
-    orderBy: [{ done: "asc" }, { sortOrder: "asc" }, { createdAt: "desc" }],
-  });
+  const params = typeof (props.searchParams as Promise<unknown>)?.then === "function"
+    ? await (props.searchParams as Promise<{ error?: string }>)
+    : (props.searchParams as { error?: string });
+  const { error } = params;
+
+  let chores: Awaited<ReturnType<typeof prisma.chore.findMany>> = [];
+  let dbError: string | null = null;
+  try {
+    chores = await prisma.chore.findMany({
+      orderBy: [{ done: "asc" }, { sortOrder: "asc" }, { createdAt: "desc" }],
+    });
+  } catch (e) {
+    dbError = e instanceof Error ? e.message : String(e);
+  }
 
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-100 p-6">
@@ -19,6 +29,11 @@ export default async function AdminChoresPage(props: {
           <Link href="/admin" className="text-neutral-400 hover:text-white text-sm">← Admin</Link>
         </header>
 
+        {dbError && (
+          <div className="mb-4 p-4 rounded bg-red-950/50 border border-red-800 text-red-200 text-sm">
+            <p>Database error: {dbError}. Run &quot;DB push and seed&quot;.</p>
+          </div>
+        )}
         {error && <p className="text-amber-500 text-sm mb-4">Title is required.</p>}
 
         <form action="/api/chores" method="POST" className="flex gap-2 mb-6">

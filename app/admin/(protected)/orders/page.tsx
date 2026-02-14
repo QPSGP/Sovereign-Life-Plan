@@ -4,23 +4,34 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default async function AdminOrdersPage(props: {
-  searchParams: Promise<{ error?: string; open?: string }>;
+  searchParams: Promise<{ error?: string; open?: string }> | { error?: string; open?: string };
 }) {
-  const { error, open: openOrderId } = await props.searchParams;
-  const [members, orders] = await Promise.all([
-    prisma.member.findMany({
-      orderBy: { lastName: "asc" },
-      select: { id: true, email: true, firstName: true, lastName: true },
-    }),
-    prisma.order.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 50,
-      include: {
-        member: { select: { id: true, email: true, firstName: true, lastName: true } },
-        orderLines: true,
-      },
-    }),
-  ]);
+  const params = typeof (props.searchParams as Promise<unknown>)?.then === "function"
+    ? await (props.searchParams as Promise<{ error?: string; open?: string }>)
+    : (props.searchParams as { error?: string; open?: string });
+  const { error, open: openOrderId } = params;
+
+  let members: { id: string; email: string; firstName: string | null; lastName: string | null }[] = [];
+  let orders: Awaited<ReturnType<typeof prisma.order.findMany>> = [];
+  let dbError: string | null = null;
+  try {
+    [members, orders] = await Promise.all([
+      prisma.member.findMany({
+        orderBy: { lastName: "asc" },
+        select: { id: true, email: true, firstName: true, lastName: true },
+      }),
+      prisma.order.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 50,
+        include: {
+          member: { select: { id: true, email: true, firstName: true, lastName: true } },
+          orderLines: true,
+        },
+      }),
+    ]);
+  } catch (e) {
+    dbError = e instanceof Error ? e.message : String(e);
+  }
 
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-100 p-6">
@@ -30,6 +41,11 @@ export default async function AdminOrdersPage(props: {
           <Link href="/admin" className="text-neutral-400 hover:text-white text-sm">← Admin</Link>
         </header>
 
+        {dbError && (
+          <div className="mb-4 p-4 rounded bg-red-950/50 border border-red-800 text-red-200 text-sm">
+            <p>Database error: {dbError}. Run &quot;DB push and seed&quot;.</p>
+          </div>
+        )}
         {error === "missing" && <p className="text-amber-500 text-sm mb-4">Select a member.</p>}
         {error === "create" && <p className="text-amber-500 text-sm mb-4">Failed to create order.</p>}
         {error === "line" && <p className="text-amber-500 text-sm mb-4">Failed to add line.</p>}

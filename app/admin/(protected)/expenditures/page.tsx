@@ -4,20 +4,31 @@ import Link from "next/link";
 export const dynamic = "force-dynamic";
 
 export default async function AdminExpendituresPage(props: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string }> | { error?: string };
 }) {
-  const { error } = await props.searchParams;
-  const [members, expenditures] = await Promise.all([
-    prisma.member.findMany({
-      orderBy: { lastName: "asc" },
-      select: { id: true, email: true, firstName: true, lastName: true },
-    }),
-    prisma.expenditure.findMany({
-      orderBy: { date: "desc" },
-      take: 100,
-      include: { member: { select: { firstName: true, lastName: true, email: true } } },
-    }),
-  ]);
+  const params = typeof (props.searchParams as Promise<unknown>)?.then === "function"
+    ? await (props.searchParams as Promise<{ error?: string }>)
+    : (props.searchParams as { error?: string });
+  const { error } = params;
+
+  let members: { id: string; email: string; firstName: string | null; lastName: string | null }[] = [];
+  let expenditures: Awaited<ReturnType<typeof prisma.expenditure.findMany>> = [];
+  let dbError: string | null = null;
+  try {
+    [members, expenditures] = await Promise.all([
+      prisma.member.findMany({
+        orderBy: { lastName: "asc" },
+        select: { id: true, email: true, firstName: true, lastName: true },
+      }),
+      prisma.expenditure.findMany({
+        orderBy: { date: "desc" },
+        take: 100,
+        include: { member: { select: { firstName: true, lastName: true, email: true } } },
+      }),
+    ]);
+  } catch (e) {
+    dbError = e instanceof Error ? e.message : String(e);
+  }
 
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-100 p-6">
@@ -27,6 +38,11 @@ export default async function AdminExpendituresPage(props: {
           <Link href="/admin" className="text-neutral-400 hover:text-white text-sm">← Admin</Link>
         </header>
 
+        {dbError && (
+          <div className="mb-4 p-4 rounded bg-red-950/50 border border-red-800 text-red-200 text-sm">
+            <p>Database error: {dbError}. Run &quot;DB push and seed&quot;.</p>
+          </div>
+        )}
         {error && <p className="text-amber-500 text-sm mb-4">Please fill required fields.</p>}
 
         <section className="mb-8">

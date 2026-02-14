@@ -7,8 +7,34 @@ export const dynamic = "force-dynamic";
 
 const COMMON_CATEGORIES = ["Personal", "MMPE4", "Agency", "Public"];
 
-export default async function AdminPage(props: { searchParams: Promise<{ category?: string }> }) {
-  const { category: filterCategory } = await props.searchParams;
+function AdminFallback({ message }: { message: string }) {
+  return (
+    <main className="min-h-screen bg-neutral-950 text-neutral-100 p-6">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-2xl font-semibold mb-4">Admin</h1>
+        <div className="p-4 rounded bg-amber-950/50 border border-amber-800 text-amber-200 text-sm">
+          <p className="font-medium">Something went wrong</p>
+          <p className="mt-2">{message}</p>
+          <p className="mt-2">
+            <a href="/api/db-status" target="_blank" rel="noopener noreferrer" className="underline">Open /api/db-status</a> to see the database error. Run &quot;DB push and seed&quot; if tables are missing.
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export default async function AdminPage(props: { searchParams: Promise<{ category?: string }> | { category?: string } }) {
+  let filterCategory: string | undefined;
+  try {
+    const params = typeof (props.searchParams as Promise<unknown>)?.then === "function"
+      ? await (props.searchParams as Promise<{ category?: string }>)
+      : (props.searchParams as { category?: string });
+    filterCategory = params.category;
+  } catch {
+    return <AdminFallback message="Invalid request." />;
+  }
+
   let plans: { id: string; name: string; slug: string; amountCents: number; interval: string }[] = [];
   let members: { id: string; email: string; firstName: string | null; lastName: string | null; company: string | null; categories: { category: string }[] }[] = [];
   let subscriptions: { id: string; status: string; memberId: string; subscriptionPlanId: string; member: { email: string; firstName: string | null; lastName: string | null }; plan: { name: string } }[] = [];
@@ -35,6 +61,7 @@ export default async function AdminPage(props: { searchParams: Promise<{ categor
     } catch (e) {
       dbError = true;
       dbErrorDetail = e instanceof Error ? e.message : String(e);
+      console.error("Admin page DB error:", e);
     }
   }
 
