@@ -7,7 +7,7 @@ const defaultPlans = [
   { name: "SOVEREIGN: Personal", slug: "sovereign-personal", amountCents: 2500, interval: "monthly", sortOrder: 1 },
   { name: "SOVEREIGN: Business", slug: "sovereign-business", amountCents: 25000, interval: "monthly", sortOrder: 2 },
 ];
-const oldSlugsToRemove = ["basic", "standard", "premium", "sovereign"];
+const keepSlugs = defaultPlans.map((p) => p.slug);
 
 async function main() {
   const defaultUserEmail = "admin@sovereign-life-plan.local";
@@ -25,12 +25,17 @@ async function main() {
   });
   console.log("Seeded default user (Life Plan owner):", defaultUserEmail);
 
-  // Remove old tiers (if no subscriptions reference them)
-  for (const slug of oldSlugsToRemove) {
+  // Remove any plan not in our two tiers (only deletes if no subscriptions reference it)
+  const toRemove = await prisma.subscriptionPlan.findMany({
+    where: { slug: { notIn: keepSlugs } },
+    select: { id: true, slug: true },
+  });
+  for (const plan of toRemove) {
     try {
-      await prisma.subscriptionPlan.deleteMany({ where: { slug } });
+      await prisma.subscriptionPlan.delete({ where: { id: plan.id } });
+      console.log("Removed old plan:", plan.slug);
     } catch (e) {
-      // Ignore if plan is in use by subscriptions
+      // Plan still in use by subscriptions; skip
     }
   }
   for (const plan of defaultPlans) {
