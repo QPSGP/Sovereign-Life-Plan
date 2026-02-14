@@ -29,45 +29,48 @@ export default async function AdminPage(props: { searchParams: Promise<{ categor
   let filterCategory: string | undefined;
   let deleted: string | undefined;
   let errorParam: string | undefined;
-  try {
-    const params = typeof (props.searchParams as Promise<unknown>)?.then === "function"
-      ? await (props.searchParams as Promise<{ category?: string; deleted?: string; error?: string }>)
-      : (props.searchParams as { category?: string; deleted?: string; error?: string });
-    filterCategory = params.category;
-    deleted = params.deleted;
-    errorParam = params.error;
-  } catch {
-    return <AdminFallback message="Invalid request." />;
-  }
-
   let plans: { id: string; name: string; slug: string; amountCents: number; interval: string }[] = [];
   let members: { id: string; email: string; firstName: string | null; lastName: string | null; company: string | null; categories: { category: string }[] }[] = [];
   let subscriptions: { id: string; status: string; memberId: string; subscriptionPlanId: string; member: { email: string; firstName: string | null; lastName: string | null }; plan: { name: string } }[] = [];
   let dbError = false;
   let dbErrorDetail: string | null = null;
 
-  if (process.env.DATABASE_URL) {
-    try {
-      [plans, members, subscriptions] = await Promise.all([
-        prisma.subscriptionPlan.findMany({ orderBy: { sortOrder: "asc" } }),
-        prisma.member.findMany({
-          where: filterCategory ? { categories: { some: { category: filterCategory } } } : undefined,
-          orderBy: { createdAt: "desc" },
-          take: 100,
-          select: { id: true, email: true, firstName: true, lastName: true, company: true, categories: { select: { category: true } } },
-        }),
-        prisma.subscription.findMany({
-          where: { status: { in: ["active", "trial"] } },
-          include: { member: { select: { email: true, firstName: true, lastName: true } }, plan: { select: { name: true } } },
-          orderBy: { createdAt: "desc" },
-          take: 50,
-        }),
-      ]);
-    } catch (e) {
-      dbError = true;
-      dbErrorDetail = e instanceof Error ? e.message : String(e);
-      console.error("Admin page DB error:", e);
+  try {
+    const raw = props.searchParams;
+    const params = typeof (raw as Promise<unknown>)?.then === "function"
+      ? await (raw as Promise<{ category?: string; deleted?: string; error?: string }>)
+      : (raw as { category?: string; deleted?: string; error?: string } | undefined);
+    filterCategory = params?.category;
+    deleted = params?.deleted;
+    errorParam = params?.error;
+
+    if (process.env.DATABASE_URL) {
+      try {
+        [plans, members, subscriptions] = await Promise.all([
+          prisma.subscriptionPlan.findMany({ orderBy: { sortOrder: "asc" } }),
+          prisma.member.findMany({
+            where: filterCategory ? { categories: { some: { category: filterCategory } } } : undefined,
+            orderBy: { createdAt: "desc" },
+            take: 100,
+            select: { id: true, email: true, firstName: true, lastName: true, company: true, categories: { select: { category: true } } },
+          }),
+          prisma.subscription.findMany({
+            where: { status: { in: ["active", "trial"] } },
+            include: { member: { select: { email: true, firstName: true, lastName: true } }, plan: { select: { name: true } } },
+            orderBy: { createdAt: "desc" },
+            take: 50,
+          }),
+        ]);
+      } catch (e) {
+        dbError = true;
+        dbErrorDetail = e instanceof Error ? e.message : String(e);
+        console.error("Admin page DB error:", e);
+      }
     }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("Admin page error:", e);
+    return <AdminFallback message={msg || "An unexpected error occurred."} />;
   }
 
   return (
