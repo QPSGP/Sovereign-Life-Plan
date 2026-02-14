@@ -2,12 +2,12 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 const prisma = new PrismaClient();
 
+// Only two tiers: SOVEREIGN: Personal ($25) and SOVEREIGN: Business ($250)
 const defaultPlans = [
-  { name: "Basic", slug: "basic", amountCents: 1900, interval: "monthly", sortOrder: 1 },
-  { name: "Standard", slug: "standard", amountCents: 4900, interval: "monthly", sortOrder: 2 },
-  { name: "Premium", slug: "premium", amountCents: 9900, interval: "monthly", sortOrder: 3 },
-  { name: "Sovereign", slug: "sovereign", amountCents: 19900, interval: "monthly", sortOrder: 4 },
+  { name: "SOVEREIGN: Personal", slug: "sovereign-personal", amountCents: 2500, interval: "monthly", sortOrder: 1 },
+  { name: "SOVEREIGN: Business", slug: "sovereign-business", amountCents: 25000, interval: "monthly", sortOrder: 2 },
 ];
+const oldSlugsToRemove = ["basic", "standard", "premium", "sovereign"];
 
 async function main() {
   const defaultUserEmail = "admin@sovereign-life-plan.local";
@@ -25,6 +25,14 @@ async function main() {
   });
   console.log("Seeded default user (Life Plan owner):", defaultUserEmail);
 
+  // Remove old tiers (if no subscriptions reference them)
+  for (const slug of oldSlugsToRemove) {
+    try {
+      await prisma.subscriptionPlan.deleteMany({ where: { slug } });
+    } catch (e) {
+      // Ignore if plan is in use by subscriptions
+    }
+  }
   for (const plan of defaultPlans) {
     await prisma.subscriptionPlan.upsert({
       where: { slug: plan.slug },
@@ -32,7 +40,7 @@ async function main() {
       create: plan,
     });
   }
-  console.log("Seeded subscription plans:", defaultPlans.map((p) => p.slug).join(", "));
+  console.log("Seeded subscription plans:", defaultPlans.map((p) => p.name).join(", "));
 }
 
 main()

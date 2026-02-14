@@ -34,15 +34,29 @@ export default async function SubjectPage({
         {error === "create" && <p className="text-amber-500 text-sm mb-4">Failed to create.</p>}
 
         <h2 className="text-lg font-medium text-neutral-300 mb-3">Areas of purpose</h2>
-        <form action="/api/life-plan/area-of-purpose" method="POST" className="flex gap-2 mb-4">
+        <form action="/api/life-plan/area-of-purpose" method="POST" className="rounded bg-neutral-900 p-4 mb-4 space-y-2">
           <input type="hidden" name="subjectBusinessId" value={subjectBusinessId} />
-          <input type="text" name="name" placeholder="Area of purpose" required className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700 flex-1" />
+          <input type="text" name="name" placeholder="Name (required)" required className="w-full rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+          <div className="grid grid-cols-2 gap-2">
+            <input type="text" name="verb" placeholder="Verb" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+            <input type="text" name="noun" placeholder="Noun" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+            <input type="text" name="object" placeholder="Object" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+            <input type="text" name="objective" placeholder="Objective" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+          </div>
           <button type="submit" className="rounded bg-emerald-700 px-4 py-2 text-sm text-white hover:bg-emerald-600">Add</button>
         </form>
         <ul className="space-y-2">
           {subject.areasOfPurpose.map((a) => (
             <li key={a.id} className="flex items-center justify-between py-2 px-3 rounded bg-neutral-900">
-              <span>{a.name}</span>
+              <div>
+                <span>{a.name}</span>
+                {(a.verb || a.noun || a.object) && (
+                  <span className="block text-neutral-500 text-sm mt-0.5">
+                    {[a.verb, a.noun, a.object].filter(Boolean).join(" ")}
+                    {a.objective && ` — ${a.objective}`}
+                  </span>
+                )}
+              </div>
               <Link href={"/admin/life-plan/purpose/" + a.id} className="text-emerald-400 text-sm hover:underline">Areas of responsibility →</Link>
             </li>
           ))}

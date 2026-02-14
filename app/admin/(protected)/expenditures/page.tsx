@@ -1,0 +1,69 @@
+import { prisma } from "@/lib/db";
+import Link from "next/link";
+
+export const dynamic = "force-dynamic";
+
+export default async function AdminExpendituresPage(props: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await props.searchParams;
+  const [members, expenditures] = await Promise.all([
+    prisma.member.findMany({
+      orderBy: { lastName: "asc" },
+      select: { id: true, email: true, firstName: true, lastName: true },
+    }),
+    prisma.expenditure.findMany({
+      orderBy: { date: "desc" },
+      take: 100,
+      include: { member: { select: { firstName: true, lastName: true, email: true } } },
+    }),
+  ]);
+
+  return (
+    <main className="min-h-screen bg-neutral-950 text-neutral-100 p-6">
+      <div className="max-w-4xl mx-auto">
+        <header className="flex items-center justify-between border-b border-neutral-800 pb-4 mb-6">
+          <h1 className="text-2xl font-semibold">Expenditures</h1>
+          <Link href="/admin" className="text-neutral-400 hover:text-white text-sm">← Admin</Link>
+        </header>
+
+        {error && <p className="text-amber-500 text-sm mb-4">Please fill required fields.</p>}
+
+        <section className="mb-8">
+          <h2 className="text-lg font-medium text-neutral-300 mb-3">Log expenditure</h2>
+          <form action="/api/expenditures" method="POST" className="rounded bg-neutral-900 p-4 space-y-3">
+            <select name="memberId" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700 min-w-[200px]">
+              <option value="">— No member (global) —</option>
+              {members.map((m) => (
+                <option key={m.id} value={m.id}>{m.firstName ?? ""} {m.lastName ?? ""} — {m.email}</option>
+              ))}
+            </select>
+            <input type="text" name="description" placeholder="Description" required className="w-full rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+            <input type="number" name="amountCents" placeholder="Amount (cents)" step="1" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700 w-40" />
+            <input type="date" name="date" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+            <input type="text" name="notes" placeholder="Notes" className="w-full rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+            <button type="submit" className="rounded bg-emerald-700 px-4 py-2 text-sm text-white hover:bg-emerald-600">Log</button>
+          </form>
+        </section>
+
+        <section>
+          <h2 className="text-lg font-medium text-neutral-300 mb-3">Recent expenditures</h2>
+          {expenditures.length === 0 ? (
+            <p className="text-neutral-500 text-sm">None yet.</p>
+          ) : (
+            <ul className="space-y-2">
+              {expenditures.map((e) => (
+                <li key={e.id} className="rounded bg-neutral-900 p-3 text-sm flex items-center justify-between">
+                  <span>{e.description}</span>
+                  <span className="text-emerald-400">${(e.amountCents / 100).toFixed(2)}</span>
+                  {e.member && <span className="text-neutral-500">{e.member.firstName} {e.member.lastName}</span>}
+                  <span className="text-neutral-600 text-xs">{e.date.toLocaleDateString()}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
+    </main>
+  );
+}

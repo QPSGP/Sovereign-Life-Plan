@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 type User = { id: string; email: string; firstName: string | null; lastName: string | null };
-type Subject = { id: string; name: string };
+type Subject = { id: string; name: string; verb?: string | null; noun?: string | null; object?: string | null; objective?: string | null };
 
 export function LifePlanClient() {
   const searchParams = useSearchParams();
@@ -112,15 +112,29 @@ export function LifePlanClient() {
               {selectedUserId && (
                 <>
                   <h3 className="text-md font-medium text-neutral-400 mb-2">Subject / Business</h3>
-                  <form action="/api/life-plan/subject-business" method="POST" className="flex gap-2 mb-4">
+                  <form action="/api/life-plan/subject-business" method="POST" className="rounded bg-neutral-900 p-4 mb-4 space-y-2">
                     <input type="hidden" name="userId" value={selectedUserId} />
-                    <input type="text" name="name" placeholder="Subject/Business name" required className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700 flex-1" />
+                    <input type="text" name="name" placeholder="Name (required)" required className="w-full rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+                    <div className="grid grid-cols-2 gap-2">
+                      <input type="text" name="verb" placeholder="Verb" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+                      <input type="text" name="noun" placeholder="Noun" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+                      <input type="text" name="object" placeholder="Object" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+                      <input type="text" name="objective" placeholder="Objective" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+                    </div>
                     <button type="submit" className="rounded bg-emerald-700 px-4 py-2 text-sm text-white hover:bg-emerald-600">Add</button>
                   </form>
                   <ul className="space-y-2">
                     {subjectBusinesses.map((s) => (
                       <li key={s.id} className="flex items-center justify-between py-2 px-3 rounded bg-neutral-900">
-                        <span>{s.name}</span>
+                        <div>
+                          <span>{s.name}</span>
+                          {(s.verb || s.noun || s.object) && (
+                            <span className="block text-neutral-500 text-sm mt-0.5">
+                              {[s.verb, s.noun, s.object].filter(Boolean).join(" ")}
+                              {s.objective && ` — ${s.objective}`}
+                            </span>
+                          )}
+                        </div>
                         <Link href={"/admin/life-plan/subject/" + s.id} className="text-emerald-400 text-sm hover:underline">Areas of purpose →</Link>
                       </li>
                     ))}

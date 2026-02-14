@@ -5,9 +5,12 @@ import { SubscriptionList } from "./SubscriptionList";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminPage() {
+const COMMON_CATEGORIES = ["Personal", "MMPE4", "Agency", "Public"];
+
+export default async function AdminPage(props: { searchParams: Promise<{ category?: string }> }) {
+  const { category: filterCategory } = await props.searchParams;
   let plans: { id: string; name: string; slug: string; amountCents: number; interval: string }[] = [];
-  let members: { id: string; email: string; firstName: string | null; lastName: string | null; company: string | null }[] = [];
+  let members: { id: string; email: string; firstName: string | null; lastName: string | null; company: string | null; categories: { category: string }[] }[] = [];
   let subscriptions: { id: string; status: string; memberId: string; subscriptionPlanId: string; member: { email: string; firstName: string | null; lastName: string | null }; plan: { name: string } }[] = [];
   let dbError = false;
   let dbErrorDetail: string | null = null;
@@ -17,9 +20,10 @@ export default async function AdminPage() {
       [plans, members, subscriptions] = await Promise.all([
         prisma.subscriptionPlan.findMany({ orderBy: { sortOrder: "asc" } }),
         prisma.member.findMany({
+          where: filterCategory ? { categories: { some: { category: filterCategory } } } : undefined,
           orderBy: { createdAt: "desc" },
           take: 100,
-          select: { id: true, email: true, firstName: true, lastName: true, company: true },
+          select: { id: true, email: true, firstName: true, lastName: true, company: true, categories: { select: { category: true } } },
         }),
         prisma.subscription.findMany({
           where: { status: { in: ["active", "trial"] } },
@@ -41,8 +45,12 @@ export default async function AdminPage() {
           <h1 className="text-2xl font-semibold">Sovereign Life Plan — Admin</h1>
           <div className="flex items-center gap-4">
             <Link href="/admin/invoices" className="text-neutral-400 hover:text-white text-sm">Invoices</Link>
+            <Link href="/admin/orders" className="text-neutral-400 hover:text-white text-sm">Orders</Link>
             <Link href="/admin/communications" className="text-neutral-400 hover:text-white text-sm">Communications</Link>
+            <Link href="/admin/expenditures" className="text-neutral-400 hover:text-white text-sm">Expenditures</Link>
+            <Link href="/admin/chores" className="text-neutral-400 hover:text-white text-sm">Chores</Link>
             <Link href="/admin/life-plan" className="text-neutral-400 hover:text-white text-sm">Life Plan</Link>
+            <Link href="/admin/reports" className="text-neutral-400 hover:text-white text-sm">Reports</Link>
             <Link href="/" className="text-neutral-400 hover:text-white text-sm">← Home</Link>
             <form action="/api/auth/admin/logout" method="POST">
               <button type="submit" className="text-neutral-500 hover:text-white text-sm">Log out</button>
@@ -101,6 +109,15 @@ export default async function AdminPage() {
 
         <section className="mb-10">
           <h2 className="text-lg font-medium text-neutral-300 mb-3">Members</h2>
+          <form method="GET" className="flex items-center gap-2 mb-3">
+            <label className="text-neutral-400 text-sm">Filter by category:</label>
+            <select name="category" defaultValue={filterCategory ?? ""} onChange={(e) => e.target.form?.submit()} className="rounded bg-neutral-800 px-2 py-1 text-sm text-white border border-neutral-700">
+              <option value="">All</option>
+              {COMMON_CATEGORIES.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </form>
           {members.length === 0 && process.env.DATABASE_URL && !dbError ? (
             <p className="text-neutral-500 text-sm">No members yet. Add one above.</p>
           ) : (
@@ -110,6 +127,17 @@ export default async function AdminPage() {
                   <span>{m.firstName ?? ""} {m.lastName ?? ""}</span>
                   <span className="text-neutral-400">{m.email}</span>
                   {m.company && <span className="text-neutral-500">{m.company}</span>}
+                  {m.categories.length > 0 && (
+                    <span className="flex flex-wrap gap-1">
+                      {m.categories.map((c) => (
+                        <span key={c.category} className="inline-flex items-center gap-1 rounded bg-neutral-800 px-1.5 py-0.5 text-xs">
+                          {c.category}
+                          <RemoveCategoryForm memberId={m.id} category={c.category} />
+                        </span>
+                      ))}
+                    </span>
+                  )}
+                  <AddCategoryForm memberId={m.id} commonCategories={COMMON_CATEGORIES} existing={m.categories.map((c) => c.category)} />
                   <AddSubscriptionForm memberId={m.id} plans={plans} />
                   <SetPasswordForm memberId={m.id} />
                 </li>
@@ -147,6 +175,30 @@ function SetPasswordForm({ memberId }: { memberId: string }) {
     <form action={`/api/members/${memberId}/password`} method="POST" className="flex items-center gap-2">
       <input type="password" name="password" placeholder="Portal password" minLength={6} className="rounded bg-neutral-800 px-2 py-1 text-sm text-white border border-neutral-700 w-32" title="Min 6 characters" />
       <button type="submit" className="rounded bg-neutral-700 px-2 py-1 text-xs text-white hover:bg-neutral-600">Set password</button>
+    </form>
+  );
+}
+
+function AddCategoryForm({ memberId, commonCategories, existing }: { memberId: string; commonCategories: string[]; existing: string[] }) {
+  const options = commonCategories.filter((c) => !existing.includes(c));
+  if (options.length === 0) return null;
+  return (
+    <form action={`/api/members/${memberId}/categories`} method="POST" className="flex items-center gap-1">
+      <select name="category" className="rounded bg-neutral-800 px-2 py-1 text-xs text-white border border-neutral-700">
+        {options.map((c) => (
+          <option key={c} value={c}>{c}</option>
+        ))}
+      </select>
+      <button type="submit" className="rounded bg-neutral-700 px-2 py-1 text-xs text-white hover:bg-neutral-600">Add category</button>
+    </form>
+  );
+}
+
+function RemoveCategoryForm({ memberId, category }: { memberId: string; category: string }) {
+  return (
+    <form action={`/api/members/${memberId}/categories/remove`} method="POST" className="inline">
+      <input type="hidden" name="category" value={category} />
+      <button type="submit" className="text-red-400 hover:text-red-300 text-xs" title="Remove category">×</button>
     </form>
   );
 }

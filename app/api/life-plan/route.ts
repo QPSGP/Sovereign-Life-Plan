@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
       subjectBusinesses = await prisma.subjectBusiness.findMany({
         where: { userId },
         orderBy: { sortOrder: "asc" },
-        select: { id: true, name: true },
+        select: { id: true, name: true, verb: true, noun: true, object: true, objective: true },
       });
     }
     return NextResponse.json({ users, subjectBusinesses });

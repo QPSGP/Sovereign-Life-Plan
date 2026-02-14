@@ -31,7 +31,11 @@ model SubjectBusiness {
   id                String   @id @default(cuid())
   userId            String
   memberId          String?  // optional: link to member for portal display
-  name              String   // Subject/Business
+  name              String   // Subject/Business (short label)
+  verb              String?  // sentence structure
+  noun              String?
+  object            String?  // or description
+  objective         String?
   sortOrder         Int      @default(0)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -46,7 +50,11 @@ model SubjectBusiness {
 model AreaOfPurpose {
   id                 String   @id @default(cuid())
   subjectBusinessId  String
-  name               String
+  name               String   // short label
+  verb               String?  // sentence structure
+  noun               String?
+  object             String?
+  objective          String?
   sortOrder          Int      @default(0)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -60,7 +68,11 @@ model AreaOfPurpose {
 model AreaOfResponsibility {
   id                String   @id @default(cuid())
   areaOfPurposeId   String
-  name              String
+  name              String   // short label
+  verb              String?  // sentence structure
+  noun              String?
+  object            String?
+  objective         String?
   sortOrder         Int      @default(0)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -117,6 +129,7 @@ model Member {
   memberPlans      MemberPlan[]
   communications   Communication[]
   subjectBusinesses SubjectBusiness[]  // life plans linked to this member (optional)
+  expenditures     Expenditure[]
 
   @@map("members")
 }
@@ -275,4 +288,33 @@ model Communication {
   member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@map("communications")
+}
+
+// ----- Expenditures (legacy EXPEND) -----
+model Expenditure {
+  id          String    @id @default(cuid())
+  memberId    String?   // optional: per-member or global
+  description String
+  amountCents Int
+  date        DateTime  @default(now())
+  notes       String?
+  createdAt   DateTime  @default(now())
+
+  member Member? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+
+  @@map("expenditures")
+}
+
+// ----- Chores (legacy CHORELST) -----
+model Chore {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  done        Boolean  @default(false)
+  doneAt      DateTime?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("chores")
 }

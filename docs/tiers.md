@@ -4,14 +4,12 @@ Define your plan levels, USD prices, billing interval, and feature flags here. T
 
 ---
 
-## Example tiers
+## Tiers (seeded)
 
-| Tier | Name       | Price (USD) | Interval | Features |
-|------|------------|-------------|----------|----------|
-| 1    | Basic      | 19         | monthly  | Profile, basic plan view, payment history |
-| 2    | Standard   | 49         | monthly  | + Full life-plan tasks, objectives, results |
-| 3    | Premium    | 99         | monthly  | + Communications log, reminders, exports |
-| 4    | Sovereign  | 199        | monthly  | + Priority support, custom areas, API/reports |
+| Tier | Name                 | Price (USD) | Interval |
+|------|----------------------|-------------|----------|
+| 1    | SOVEREIGN: Personal  | 25          | monthly  |
+| 2    | SOVEREIGN: Business  | 250         | monthly  |
 
 Optional: add yearly prices (e.g. 2 months free) and store in the same table with `interval = 'yearly'`.
 

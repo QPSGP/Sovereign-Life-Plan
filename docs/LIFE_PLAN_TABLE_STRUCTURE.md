@@ -21,10 +21,10 @@ User (staff)
 | Table | Parent | Purpose |
 |-------|--------|---------|
 | **users** | — | Staff user (admin/agent). Top of the life plan tree. |
-| **subject_business** | users | Subject/Business (e.g. Agency, Public). Optional link to **members** for member-portal display. |
-| **area_of_purpose** | subject_business | Area of purpose under a subject/business. |
-| **area_of_responsibility** | area_of_purpose | Area of responsibility under an area of purpose. |
-| **physical_movement** | area_of_responsibility | Physical movement / task: verb, noun, object, objective, results, done, doneAt. |
+| **subject_business** | users | Subject/Business: **name** (label) + sentence structure **verb, noun, object, objective**. Optional link to **members** for portal. |
+| **area_of_purpose** | subject_business | Area of purpose: **name** + **verb, noun, object, objective**. |
+| **area_of_responsibility** | area_of_purpose | Area of responsibility: **name** + **verb, noun, object, objective**. |
+| **physical_movement** | area_of_responsibility | Physical movement / task: **verb, noun, object**, objective, results, done, doneAt. |
 
 ---
 
