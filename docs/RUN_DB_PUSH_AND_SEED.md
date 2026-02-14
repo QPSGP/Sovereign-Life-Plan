@@ -8,7 +8,9 @@ Your `DATABASE_URL` is set in **Vercel**, not on your machine. Use GitHub Action
 
 ## Run the workflow again (e.g. after schema changes)
 
-When you add new columns or tables (e.g. `passwordHash` for member login), run the workflow **again** so the database is updated.
+When you add new columns or tables, run the workflow so the database is updated.
+
+**Run it once.** You do not need to click "Run workflow" twice. The message **"This workflow has a workflow_dispatch trigger"** is normal — it just means the workflow runs only when you start it manually.
 
 1. Open: **https://github.com/QPSGP/Sovereign-Life-Plan/actions**
 2. In the **left sidebar**, click **“DB push and seed”**.

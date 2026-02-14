@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { AddMemberForm } from "./AddMemberForm";
+import { DeleteMemberButton } from "./DeleteMemberButton";
 import { SubscriptionList } from "./SubscriptionList";
 
 export const dynamic = "force-dynamic";
@@ -24,13 +25,17 @@ function AdminFallback({ message }: { message: string }) {
   );
 }
 
-export default async function AdminPage(props: { searchParams: Promise<{ category?: string }> | { category?: string } }) {
+export default async function AdminPage(props: { searchParams: Promise<{ category?: string; deleted?: string; error?: string }> | { category?: string; deleted?: string; error?: string } }) {
   let filterCategory: string | undefined;
+  let deleted: string | undefined;
+  let errorParam: string | undefined;
   try {
     const params = typeof (props.searchParams as Promise<unknown>)?.then === "function"
-      ? await (props.searchParams as Promise<{ category?: string }>)
-      : (props.searchParams as { category?: string });
+      ? await (props.searchParams as Promise<{ category?: string; deleted?: string; error?: string }>)
+      : (props.searchParams as { category?: string; deleted?: string; error?: string });
     filterCategory = params.category;
+    deleted = params.deleted;
+    errorParam = params.error;
   } catch {
     return <AdminFallback message="Invalid request." />;
   }
@@ -88,6 +93,8 @@ export default async function AdminPage(props: { searchParams: Promise<{ categor
         {!process.env.DATABASE_URL && (
           <p className="text-amber-500 mb-6">Database not configured. Set DATABASE_URL in Vercel.</p>
         )}
+        {deleted && <p className="text-emerald-500 text-sm mb-4">Member deleted.</p>}
+        {errorParam === "delete" && <p className="text-amber-500 text-sm mb-4">Could not delete member (may have dependent data).</p>}
         {dbError && (
           <div className="text-amber-500 mb-6 space-y-2">
             <p className="font-medium">Database error — tables may not exist yet.</p>
@@ -167,6 +174,7 @@ export default async function AdminPage(props: { searchParams: Promise<{ categor
                   <AddCategoryForm memberId={m.id} commonCategories={COMMON_CATEGORIES} existing={m.categories.map((c) => c.category)} />
                   <AddSubscriptionForm memberId={m.id} plans={plans} />
                   <SetPasswordForm memberId={m.id} />
+                  <DeleteMemberButton memberId={m.id} memberName={[m.firstName, m.lastName].filter(Boolean).join(" ") || m.email} />
                 </li>
               ))}
             </ul>
@@ -229,3 +237,4 @@ function RemoveCategoryForm({ memberId, category }: { memberId: string; category
     </form>
   );
 }
+
