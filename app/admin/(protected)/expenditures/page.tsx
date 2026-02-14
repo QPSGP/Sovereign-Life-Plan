@@ -12,10 +12,11 @@ export default async function AdminExpendituresPage(props: {
   const { error } = params;
 
   let members: { id: string; email: string; firstName: string | null; lastName: string | null }[] = [];
-  let expenditures: Awaited<ReturnType<typeof prisma.expenditure.findMany>> = [];
+  type ExpenditureWithMember = { id: string; memberId: string | null; description: string; amountCents: number; date: Date; notes: string | null; createdAt: Date; member: { firstName: string | null; lastName: string | null; email: string } | null };
+  let expenditures: ExpenditureWithMember[] = [];
   let dbError: string | null = null;
   try {
-    [members, expenditures] = await Promise.all([
+    const [membersData, expendituresData] = await Promise.all([
       prisma.member.findMany({
         orderBy: { lastName: "asc" },
         select: { id: true, email: true, firstName: true, lastName: true },
@@ -26,6 +27,8 @@ export default async function AdminExpendituresPage(props: {
         include: { member: { select: { firstName: true, lastName: true, email: true } } },
       }),
     ]);
+    members = membersData;
+    expenditures = expendituresData;
   } catch (e) {
     dbError = e instanceof Error ? e.message : String(e);
   }
