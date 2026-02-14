@@ -3,26 +3,50 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminInvoicesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string; created?: string; paid?: string }>;
+type InvoiceWithMemberAndPayments = {
+  id: string;
+  memberId: string;
+  invoiceNumber: string | null;
+  amountCents: number;
+  dueDate: Date;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  member: { id: string; email: string; firstName: string | null; lastName: string | null };
+  payments: { id: string; amountCents: number }[];
+};
+
+export default async function AdminInvoicesPage(props: {
+  searchParams: Promise<{ error?: string; created?: string; paid?: string }> | { error?: string; created?: string; paid?: string };
 }) {
-  const { error, created, paid } = await searchParams;
-  const [members, invoices] = await Promise.all([
-    prisma.member.findMany({
-      orderBy: { lastName: "asc" },
-      select: { id: true, email: true, firstName: true, lastName: true },
-    }),
-    prisma.invoice.findMany({
-      orderBy: { dueDate: "desc" },
-      take: 100,
-      include: {
-        member: { select: { id: true, email: true, firstName: true, lastName: true } },
-        payments: true,
-      },
-    }),
-  ]);
+  const params = typeof (props.searchParams as Promise<unknown>)?.then === "function"
+    ? await (props.searchParams as Promise<{ error?: string; created?: string; paid?: string }>)
+    : (props.searchParams as { error?: string; created?: string; paid?: string });
+  const { error, created, paid } = params;
+
+  let members: { id: string; email: string; firstName: string | null; lastName: string | null }[] = [];
+  let invoices: InvoiceWithMemberAndPayments[] = [];
+  let dbError: string | null = null;
+  try {
+    const [membersData, invoicesData] = await Promise.all([
+      prisma.member.findMany({
+        orderBy: { lastName: "asc" },
+        select: { id: true, email: true, firstName: true, lastName: true },
+      }),
+      prisma.invoice.findMany({
+        orderBy: { dueDate: "desc" },
+        take: 100,
+        include: {
+          member: { select: { id: true, email: true, firstName: true, lastName: true } },
+          payments: true,
+        },
+      }),
+    ]);
+    members = membersData;
+    invoices = invoicesData;
+  } catch (e) {
+    dbError = e instanceof Error ? e.message : String(e);
+  }
 
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-100 p-6">
@@ -32,6 +56,12 @@ export default async function AdminInvoicesPage({
           <Link href="/admin" className="text-neutral-400 hover:text-white text-sm">← Admin</Link>
         </header>
 
+        {dbError && (
+          <div className="mb-4 p-4 rounded bg-red-950/50 border border-red-800 text-red-200 text-sm">
+            <p>Database error: {dbError}. Run &quot;DB push and seed&quot;.</p>
+            <p className="mt-1"><a href="/api/db-status" target="_blank" rel="noopener noreferrer" className="underline">Open /api/db-status</a> for details.</p>
+          </div>
+        )}
         {error === "missing" && <p className="text-amber-500 text-sm mb-4">Member, amount, and due date are required.</p>}
         {error === "amount" && <p className="text-amber-500 text-sm mb-4">Payment amount must be greater than 0.</p>}
         {error === "create" && <p className="text-amber-500 text-sm mb-4">Failed to create invoice.</p>}

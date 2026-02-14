@@ -1,3 +1,4 @@
+import type { Chore } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 
@@ -11,7 +12,7 @@ export default async function AdminChoresPage(props: {
     : (props.searchParams as { error?: string });
   const { error } = params;
 
-  let chores: Awaited<ReturnType<typeof prisma.chore.findMany>> = [];
+  let chores: Chore[] = [];
   let dbError: string | null = null;
   try {
     chores = await prisma.chore.findMany({

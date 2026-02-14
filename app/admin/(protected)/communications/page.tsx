@@ -3,23 +3,44 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminCommunicationsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string; created?: string }>;
+type CommunicationWithMember = {
+  id: string;
+  memberId: string;
+  type: string;
+  subject: string | null;
+  notes: string | null;
+  createdAt: Date;
+  member: { id: string; email: string; firstName: string | null; lastName: string | null };
+};
+
+export default async function AdminCommunicationsPage(props: {
+  searchParams: Promise<{ error?: string; created?: string }> | { error?: string; created?: string };
 }) {
-  const { error, created } = await searchParams;
-  const [members, communications] = await Promise.all([
-    prisma.member.findMany({
-      orderBy: { lastName: "asc" },
-      select: { id: true, email: true, firstName: true, lastName: true },
-    }),
-    prisma.communication.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 100,
-      include: { member: { select: { id: true, email: true, firstName: true, lastName: true } } },
-    }),
-  ]);
+  const params = typeof (props.searchParams as Promise<unknown>)?.then === "function"
+    ? await (props.searchParams as Promise<{ error?: string; created?: string }>)
+    : (props.searchParams as { error?: string; created?: string });
+  const { error, created } = params;
+
+  let members: { id: string; email: string; firstName: string | null; lastName: string | null }[] = [];
+  let communications: CommunicationWithMember[] = [];
+  let dbError: string | null = null;
+  try {
+    const [membersData, communicationsData] = await Promise.all([
+      prisma.member.findMany({
+        orderBy: { lastName: "asc" },
+        select: { id: true, email: true, firstName: true, lastName: true },
+      }),
+      prisma.communication.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 100,
+        include: { member: { select: { id: true, email: true, firstName: true, lastName: true } } },
+      }),
+    ]);
+    members = membersData;
+    communications = communicationsData;
+  } catch (e) {
+    dbError = e instanceof Error ? e.message : String(e);
+  }
 
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-100 p-6">
@@ -29,6 +50,12 @@ export default async function AdminCommunicationsPage({
           <Link href="/admin" className="text-neutral-400 hover:text-white text-sm">← Admin</Link>
         </header>
 
+        {dbError && (
+          <div className="mb-4 p-4 rounded bg-red-950/50 border border-red-800 text-red-200 text-sm">
+            <p>Database error: {dbError}. Run &quot;DB push and seed&quot;.</p>
+            <p className="mt-1"><a href="/api/db-status" target="_blank" rel="noopener noreferrer" className="underline">Open /api/db-status</a> for details.</p>
+          </div>
+        )}
         {error === "missing" && <p className="text-amber-500 text-sm mb-4">Member is required.</p>}
         {error === "create" && <p className="text-amber-500 text-sm mb-4">Failed to log communication.</p>}
         {created && <p className="text-emerald-500 text-sm mb-4">Communication logged.</p>}
