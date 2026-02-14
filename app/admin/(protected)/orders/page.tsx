@@ -12,10 +12,21 @@ export default async function AdminOrdersPage(props: {
   const { error, open: openOrderId } = params;
 
   let members: { id: string; email: string; firstName: string | null; lastName: string | null }[] = [];
-  let orders: Awaited<ReturnType<typeof prisma.order.findMany>> = [];
+  type OrderWithMemberAndLines = {
+    id: string;
+    memberId: string;
+    orderNumber: string | null;
+    totalCents: number;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+    member: { id: string; email: string; firstName: string | null; lastName: string | null };
+    orderLines: { id: string; orderId: string; type: string | null; item: string | null; unitCents: number; quantity: number; totalCents: number; createdAt: Date }[];
+  };
+  let orders: OrderWithMemberAndLines[] = [];
   let dbError: string | null = null;
   try {
-    [members, orders] = await Promise.all([
+    const [membersData, ordersData] = await Promise.all([
       prisma.member.findMany({
         orderBy: { lastName: "asc" },
         select: { id: true, email: true, firstName: true, lastName: true },
@@ -29,6 +40,8 @@ export default async function AdminOrdersPage(props: {
         },
       }),
     ]);
+    members = membersData;
+    orders = ordersData;
   } catch (e) {
     dbError = e instanceof Error ? e.message : String(e);
   }
