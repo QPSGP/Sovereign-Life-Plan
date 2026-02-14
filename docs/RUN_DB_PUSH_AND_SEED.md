@@ -2,6 +2,8 @@
 
 Your `DATABASE_URL` is set in **Vercel**, not on your machine. Use GitHub Actions to create/update tables and (optionally) seed plans.
 
+**Two separate things:** (1) **Vercel deployment** = when you push code to GitHub, Vercel builds and deploys the app. (2) **DB push and seed** = this workflow only updates the database (tables + seed). Running the workflow does **not** trigger a new Vercel deployment. To get a new deployment, push a commit or click Redeploy in the Vercel dashboard.
+
 ---
 
 ## Run the workflow again (e.g. after schema changes)
