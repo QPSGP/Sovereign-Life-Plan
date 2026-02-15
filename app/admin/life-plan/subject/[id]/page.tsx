@@ -36,7 +36,7 @@ export default async function SubjectPage({
         <h2 className="text-lg font-medium text-neutral-300 mb-3">Areas of purpose</h2>
         <form action="/api/life-plan/area-of-purpose" method="POST" className="rounded bg-neutral-900 p-4 mb-4 space-y-2">
           <input type="hidden" name="subjectBusinessId" value={subjectBusinessId} />
-          <input type="text" name="name" placeholder="Name (required)" required className="w-full rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+          <input type="text" name="name" placeholder="Name (required)" required className="w-full rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" title="Only name is required" />
           <div className="grid grid-cols-2 gap-2">
             <input type="text" name="verb" placeholder="Verb" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
             <input type="text" name="noun" placeholder="Noun" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
@@ -45,23 +45,33 @@ export default async function SubjectPage({
           </div>
           <button type="submit" className="rounded bg-emerald-700 px-4 py-2 text-sm text-white hover:bg-emerald-600">Add</button>
         </form>
-        <ul className="space-y-2">
-          {subject.areasOfPurpose.map((a) => (
-            <li key={a.id} className="flex items-center justify-between py-2 px-3 rounded bg-neutral-900">
-              <div>
-                <span>{a.name}</span>
-                {(a.verb || a.noun || a.object) && (
-                  <span className="block text-neutral-500 text-sm mt-0.5">
-                    {[a.verb, a.noun, a.object].filter(Boolean).join(" ")}
-                    {a.objective && ` — ${a.objective}`}
-                  </span>
-                )}
-              </div>
-              <Link href={"/admin/life-plan/purpose/" + a.id} className="text-emerald-400 text-sm hover:underline">Areas of responsibility →</Link>
-            </li>
-          ))}
-          {subject.areasOfPurpose.length === 0 && <li className="text-neutral-500 text-sm">No areas of purpose yet.</li>}
-        </ul>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="text-left text-neutral-400 border-b border-neutral-700">
+                <th className="py-2 pr-4">Name</th>
+                <th className="py-2 pr-4">Verb</th>
+                <th className="py-2 pr-4">Noun</th>
+                <th className="py-2 pr-4">Object</th>
+                <th className="py-2 pr-4">Objective</th>
+                <th className="py-2 pr-4"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {subject.areasOfPurpose.map((a) => (
+                <tr key={a.id} className="border-b border-neutral-800">
+                  <td className="py-2 pr-4">{a.name}</td>
+                  <td className="py-2 pr-4 text-neutral-400">{a.verb ?? "—"}</td>
+                  <td className="py-2 pr-4 text-neutral-400">{a.noun ?? "—"}</td>
+                  <td className="py-2 pr-4 text-neutral-400">{a.object ?? "—"}</td>
+                  <td className="py-2 pr-4 text-neutral-400">{a.objective ?? "—"}</td>
+                  <td className="py-2"><Link href={"/admin/life-plan/purpose/" + a.id} className="text-emerald-400 text-sm hover:underline">Areas of responsibility →</Link></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {subject.areasOfPurpose.length === 0 && <p className="text-neutral-500 text-sm py-2">No areas of purpose yet.</p>}
+        </div>
       </div>
     </main>
   );

@@ -123,23 +123,33 @@ export function LifePlanClient() {
                     </div>
                     <button type="submit" className="rounded bg-emerald-700 px-4 py-2 text-sm text-white hover:bg-emerald-600">Add</button>
                   </form>
-                  <ul className="space-y-2">
-                    {subjectBusinesses.map((s) => (
-                      <li key={s.id} className="flex items-center justify-between py-2 px-3 rounded bg-neutral-900">
-                        <div>
-                          <span>{s.name}</span>
-                          {(s.verb || s.noun || s.object) && (
-                            <span className="block text-neutral-500 text-sm mt-0.5">
-                              {[s.verb, s.noun, s.object].filter(Boolean).join(" ")}
-                              {s.objective && ` — ${s.objective}`}
-                            </span>
-                          )}
-                        </div>
-                        <Link href={"/admin/life-plan/subject/" + s.id} className="text-emerald-400 text-sm hover:underline">Areas of purpose →</Link>
-                      </li>
-                    ))}
-                    {subjectBusinesses.length === 0 && <li className="text-neutral-500 text-sm">No Subject/Business yet. Add one above.</li>}
-                  </ul>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm border-collapse">
+                      <thead>
+                        <tr className="text-left text-neutral-400 border-b border-neutral-700">
+                          <th className="py-2 pr-4">Name</th>
+                          <th className="py-2 pr-4">Verb</th>
+                          <th className="py-2 pr-4">Noun</th>
+                          <th className="py-2 pr-4">Object</th>
+                          <th className="py-2 pr-4">Objective</th>
+                          <th className="py-2 pr-4"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {subjectBusinesses.map((s) => (
+                          <tr key={s.id} className="border-b border-neutral-800">
+                            <td className="py-2 pr-4">{s.name}</td>
+                            <td className="py-2 pr-4 text-neutral-400">{s.verb ?? "—"}</td>
+                            <td className="py-2 pr-4 text-neutral-400">{s.noun ?? "—"}</td>
+                            <td className="py-2 pr-4 text-neutral-400">{s.object ?? "—"}</td>
+                            <td className="py-2 pr-4 text-neutral-400">{s.objective ?? "—"}</td>
+                            <td className="py-2"><Link href={"/admin/life-plan/subject/" + s.id} className="text-emerald-400 hover:underline">Areas of purpose →</Link></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {subjectBusinesses.length === 0 && <p className="text-neutral-500 text-sm py-2">No Subject/Business yet. Add one above.</p>}
+                  </div>
                 </>
               )}
             </>

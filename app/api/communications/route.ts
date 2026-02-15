@@ -12,6 +12,9 @@ export async function POST(req: NextRequest) {
     if (!memberId) {
       return NextResponse.redirect(new URL("/admin/communications?error=missing", origin));
     }
+    if (!subject) {
+      return NextResponse.redirect(new URL("/admin/communications?error=missing", origin));
+    }
     await prisma.communication.create({
       data: { memberId, type, subject, notes },
     });

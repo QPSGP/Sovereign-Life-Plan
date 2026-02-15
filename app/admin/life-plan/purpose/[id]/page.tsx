@@ -45,23 +45,33 @@ export default async function PurposePage({
           </div>
           <button type="submit" className="rounded bg-emerald-700 px-4 py-2 text-sm text-white hover:bg-emerald-600">Add</button>
         </form>
-        <ul className="space-y-2">
-          {purpose.areasOfResponsibility.map((a) => (
-            <li key={a.id} className="flex items-center justify-between py-2 px-3 rounded bg-neutral-900">
-              <div>
-                <span>{a.name}</span>
-                {(a.verb || a.noun || a.object) && (
-                  <span className="block text-neutral-500 text-sm mt-0.5">
-                    {[a.verb, a.noun, a.object].filter(Boolean).join(" ")}
-                    {a.objective && ` — ${a.objective}`}
-                  </span>
-                )}
-              </div>
-              <Link href={"/admin/life-plan/responsibility/" + a.id} className="text-emerald-400 text-sm hover:underline">Physical movements →</Link>
-            </li>
-          ))}
-          {purpose.areasOfResponsibility.length === 0 && <li className="text-neutral-500 text-sm">No areas of responsibility yet.</li>}
-        </ul>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="text-left text-neutral-400 border-b border-neutral-700">
+                <th className="py-2 pr-4">Name</th>
+                <th className="py-2 pr-4">Verb</th>
+                <th className="py-2 pr-4">Noun</th>
+                <th className="py-2 pr-4">Object</th>
+                <th className="py-2 pr-4">Objective</th>
+                <th className="py-2 pr-4"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {purpose.areasOfResponsibility.map((a) => (
+                <tr key={a.id} className="border-b border-neutral-800">
+                  <td className="py-2 pr-4">{a.name}</td>
+                  <td className="py-2 pr-4 text-neutral-400">{a.verb ?? "—"}</td>
+                  <td className="py-2 pr-4 text-neutral-400">{a.noun ?? "—"}</td>
+                  <td className="py-2 pr-4 text-neutral-400">{a.object ?? "—"}</td>
+                  <td className="py-2 pr-4 text-neutral-400">{a.objective ?? "—"}</td>
+                  <td className="py-2"><Link href={"/admin/life-plan/responsibility/" + a.id} className="text-emerald-400 text-sm hover:underline">Physical movements →</Link></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {purpose.areasOfResponsibility.length === 0 && <p className="text-neutral-500 text-sm py-2">No areas of responsibility yet.</p>}
+        </div>
       </div>
     </main>
   );

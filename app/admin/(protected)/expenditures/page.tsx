@@ -57,7 +57,7 @@ export default async function AdminExpendituresPage(props: {
                 <option key={m.id} value={m.id}>{m.firstName ?? ""} {m.lastName ?? ""} — {m.email}</option>
               ))}
             </select>
-            <input type="text" name="description" placeholder="Description" required className="w-full rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+            <input type="text" name="description" placeholder="Description (required)" required className="w-full rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
             <input type="number" name="amountCents" placeholder="Amount (cents)" step="1" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700 w-40" />
             <input type="date" name="date" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
             <input type="text" name="notes" placeholder="Notes" className="w-full rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
@@ -70,16 +70,32 @@ export default async function AdminExpendituresPage(props: {
           {expenditures.length === 0 ? (
             <p className="text-neutral-500 text-sm">None yet.</p>
           ) : (
-            <ul className="space-y-2">
-              {expenditures.map((e) => (
-                <li key={e.id} className="rounded bg-neutral-900 p-3 text-sm flex items-center justify-between">
-                  <span>{e.description}</span>
-                  <span className="text-emerald-400">${(e.amountCents / 100).toFixed(2)}</span>
-                  {e.member && <span className="text-neutral-500">{e.member.firstName} {e.member.lastName}</span>}
-                  <span className="text-neutral-600 text-xs">{e.date.toLocaleDateString()}</span>
-                </li>
-              ))}
-            </ul>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="text-left text-neutral-400 border-b border-neutral-700">
+                    <th className="py-2 pr-4">Description</th>
+                    <th className="py-2 pr-4">Member</th>
+                    <th className="py-2 pr-4">Amount</th>
+                    <th className="py-2 pr-4">Date</th>
+                    <th className="py-2 pr-4">Notes</th>
+                    <th className="py-2 pr-4">Created</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {expenditures.map((e) => (
+                    <tr key={e.id} className="border-b border-neutral-800">
+                      <td className="py-2 pr-4">{e.description}</td>
+                      <td className="py-2 pr-4 text-neutral-400">{e.member ? `${e.member.firstName ?? ""} ${e.member.lastName ?? ""}`.trim() || e.member.email : "—"}</td>
+                      <td className="py-2 pr-4 text-emerald-400">${(e.amountCents / 100).toFixed(2)}</td>
+                      <td className="py-2 pr-4 text-neutral-400">{e.date.toLocaleDateString()}</td>
+                      <td className="py-2 pr-4 text-neutral-400 max-w-[150px] truncate">{e.notes ?? "—"}</td>
+                      <td className="py-2 pr-4 text-neutral-500 text-xs">{e.createdAt.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </section>
       </div>

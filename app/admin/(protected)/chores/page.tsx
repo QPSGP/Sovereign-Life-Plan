@@ -38,29 +38,44 @@ export default async function AdminChoresPage(props: {
         {error && <p className="text-amber-500 text-sm mb-4">Title is required.</p>}
 
         <form action="/api/chores" method="POST" className="flex gap-2 mb-6">
-          <input type="text" name="title" placeholder="Chore title" required className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700 flex-1" />
+          <input type="text" name="title" placeholder="Title (required)" required className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700 flex-1" />
           <input type="text" name="description" placeholder="Description" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700 flex-1" />
           <button type="submit" className="rounded bg-emerald-700 px-4 py-2 text-sm text-white hover:bg-emerald-600">Add</button>
         </form>
 
-        <ul className="space-y-2">
-          {chores.length === 0 ? (
-            <li className="text-neutral-500 text-sm">No chores yet.</li>
-          ) : (
-            chores.map((c) => (
-              <li key={c.id} className={`rounded bg-neutral-900 p-3 flex items-center justify-between ${c.done ? "opacity-70" : ""}`}>
-                <span className={c.done ? "line-through text-neutral-500" : ""}>{c.title}</span>
-                {c.description && <span className="text-neutral-500 text-sm truncate max-w-[200px]">{c.description}</span>}
-                <form action={`/api/chores/${c.id}/done`} method="POST">
-                  <input type="hidden" name="done" value={c.done ? "false" : "true"} />
-                  <button type="submit" className="rounded px-2 py-1 text-xs border border-neutral-600 hover:bg-neutral-800">
-                    {c.done ? "Undo" : "Done"}
-                  </button>
-                </form>
-              </li>
-            ))
-          )}
-        </ul>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="text-left text-neutral-400 border-b border-neutral-700">
+                <th className="py-2 pr-4">Title</th>
+                <th className="py-2 pr-4">Description</th>
+                <th className="py-2 pr-4">Done</th>
+                <th className="py-2 pr-4"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {chores.length === 0 ? (
+                <tr><td colSpan={4} className="py-2 text-neutral-500 text-sm">No chores yet.</td></tr>
+              ) : (
+                chores.map((c) => (
+                  <tr key={c.id} className={`border-b border-neutral-800 ${c.done ? "opacity-70" : ""}`}>
+                    <td className="py-2 pr-4">{c.done ? <span className="line-through text-neutral-500">{c.title}</span> : c.title}</td>
+                    <td className="py-2 pr-4 text-neutral-400">{c.description ?? "—"}</td>
+                    <td className="py-2 pr-4">{c.done ? "Yes" : "No"}</td>
+                    <td className="py-2">
+                      <form action={`/api/chores/${c.id}/done`} method="POST" className="inline">
+                        <input type="hidden" name="done" value={c.done ? "false" : "true"} />
+                        <button type="submit" className="rounded px-2 py-1 text-xs border border-neutral-600 hover:bg-neutral-800">
+                          {c.done ? "Undo" : "Done"}
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
   );

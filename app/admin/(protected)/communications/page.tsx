@@ -56,7 +56,7 @@ export default async function AdminCommunicationsPage(props: {
             <p className="mt-1"><a href="/api/db-status" target="_blank" rel="noopener noreferrer" className="underline">Open /api/db-status</a> for details.</p>
           </div>
         )}
-        {error === "missing" && <p className="text-amber-500 text-sm mb-4">Member is required.</p>}
+        {error === "missing" && <p className="text-amber-500 text-sm mb-4">Member and subject are required.</p>}
         {error === "create" && <p className="text-amber-500 text-sm mb-4">Failed to log communication.</p>}
         {created && <p className="text-emerald-500 text-sm mb-4">Communication logged.</p>}
 
@@ -76,7 +76,7 @@ export default async function AdminCommunicationsPage(props: {
                 <option value="email">Email</option>
               </select>
             </div>
-            <input type="text" name="subject" placeholder="Subject" className="w-full rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
+            <input type="text" name="subject" placeholder="Subject (required)" required className="w-full rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
             <textarea name="notes" placeholder="Notes" rows={2} className="w-full rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
             <button type="submit" className="rounded bg-emerald-700 px-4 py-2 text-sm text-white hover:bg-emerald-600">Log</button>
           </form>
@@ -87,18 +87,30 @@ export default async function AdminCommunicationsPage(props: {
           {communications.length === 0 ? (
             <p className="text-neutral-500 text-sm">None yet.</p>
           ) : (
-            <ul className="space-y-2">
-              {communications.map((c) => (
-                <li key={c.id} className="rounded bg-neutral-900 p-4 text-sm">
-                  <span className="text-neutral-400">{c.type}</span>
-                  <span className="mx-2">·</span>
-                  <span>{c.member.firstName} {c.member.lastName}</span>
-                  {c.subject && <span className="text-neutral-300 block mt-1">{c.subject}</span>}
-                  {c.notes && <span className="text-neutral-500 block mt-1">{c.notes}</span>}
-                  <span className="text-neutral-600 text-xs block mt-1">{c.createdAt.toLocaleString()}</span>
-                </li>
-              ))}
-            </ul>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="text-left text-neutral-400 border-b border-neutral-700">
+                    <th className="py-2 pr-4">Type</th>
+                    <th className="py-2 pr-4">Member</th>
+                    <th className="py-2 pr-4">Subject</th>
+                    <th className="py-2 pr-4">Notes</th>
+                    <th className="py-2 pr-4">Created</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {communications.map((c) => (
+                    <tr key={c.id} className="border-b border-neutral-800">
+                      <td className="py-2 pr-4">{c.type}</td>
+                      <td className="py-2 pr-4">{c.member.firstName} {c.member.lastName}</td>
+                      <td className="py-2 pr-4">{c.subject ?? "—"}</td>
+                      <td className="py-2 pr-4 text-neutral-400 max-w-[200px] truncate">{c.notes ?? "—"}</td>
+                      <td className="py-2 pr-4 text-neutral-500 text-xs">{c.createdAt.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </section>
       </div>

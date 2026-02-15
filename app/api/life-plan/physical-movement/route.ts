@@ -13,6 +13,9 @@ export async function POST(req: NextRequest) {
   if (!areaOfResponsibilityId) {
     return NextResponse.redirect(new URL("/admin/life-plan?error=missing", origin));
   }
+  if (!verb) {
+    return NextResponse.redirect(new URL("/admin/life-plan/responsibility/" + areaOfResponsibilityId + "?error=missing", origin));
+  }
   try {
     await prisma.physicalMovement.create({
       data: {
