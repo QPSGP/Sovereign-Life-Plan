@@ -14,12 +14,12 @@ When you add new columns or tables, run the workflow so the database is updated.
 
 1. Open: **https://github.com/QPSGP/Sovereign-Life-Plan/actions**
 2. In the **left sidebar**, click **“DB push and seed”**.
-3. On the right, click the **“Run workflow”** dropdown (gray button).
+3. On the right, click the **“Run workflow”** button—it sits **above the list of past runs** on the right (no yellow box).
 4. Leave the branch as **main** (or your default branch), then click the green **“Run workflow”** button.
 5. Wait until the run appears at the top and shows a **green checkmark** (about 1–2 minutes).  
    - If it fails (red X), open the run, click the **“db”** job, and check the log for errors.
 
-**If the gray "Run workflow" button does not appear on the right:** Click the workflow name **"DB push and seed"** in the left sidebar (under "All workflows") so the main area shows that workflow. The button only appears when that workflow is selected, not when you are on "All workflows" or viewing a past run. If you have limited repo permissions, an admin may need to run it (Settings → Actions → General).
+**If you don't see "Run workflow":** (1) Click **"DB push and seed"** in the left sidebar—the button appears **above the list of past runs** on the right, not in a separate box. (2) You need write access to the repo; otherwise an admin must run it. (3) The workflow must exist on the **main** branch (it does in this repo).
 
 After it succeeds, your database has the latest schema (e.g. the `passwordHash` column on `members`). You do **not** need to add secrets again if `DATABASE_URL` is already set.
 
