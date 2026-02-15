@@ -21,7 +21,7 @@
   - **Admin:** Life Plan (subject, area of purpose, area of responsibility, physical movement), Communications, Chores, Expenditures, **Members** (full profile edit at `/admin/members/[id]/edit`).
   - **Members (portal):** Profile edit at `/portal/profile/edit`; Life Plan subject/business edit when a plan is linked (portal plan subject page has edit form).
 - **Member delete:** Admin can delete members (with confirm); API `POST /api/members/[id]/delete`.
-- **DB:** Seed keeps only `sovereign-personal` and `sovereign-business` plans; run "DB push and seed" via GitHub Actions (must be **logged in to GitHub** to see "Run workflow").
+- **DB:** Seed keeps only `sovereign-personal` and `sovereign-business` plans; run "DB push and seed" via GitHub Actions (must be **logged in to GitHub** to see "Run workflow"). Optional **demo data**: run `npm run db:seed:demo` (after main seed) to populate one member, a life plan, communications, chores, expenditures, and an invoice—see `docs/DATA_AND_IMPORT.md`.
 
 ---
 
