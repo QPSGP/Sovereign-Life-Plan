@@ -35,6 +35,7 @@
 | Portal | `app/portal/(protected)/page.tsx`, `profile/edit`, `plan/subject/[id]` |
 | Portal APIs | `app/api/portal/profile`, `app/api/portal/life-plan/subject-business/[id]` |
 | Config | `prisma/schema.prisma`, `prisma/seed.js`, `lib/db.ts`, `lib/auth.ts`, `lib/member-auth.ts` |
+| **How tables work** | `docs/HOW_TABLES_FUNCTION.md` — how each table works alone and with others (Paradox-style reference). |
 
 ---
 
