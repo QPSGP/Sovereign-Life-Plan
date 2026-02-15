@@ -143,7 +143,11 @@ export function LifePlanClient() {
                             <td className="py-2 pr-4 text-neutral-400">{s.noun ?? "—"}</td>
                             <td className="py-2 pr-4 text-neutral-400">{s.object ?? "—"}</td>
                             <td className="py-2 pr-4 text-neutral-400">{s.objective ?? "—"}</td>
-                            <td className="py-2"><Link href={"/admin/life-plan/subject/" + s.id} className="text-emerald-400 hover:underline">Areas of purpose →</Link></td>
+                            <td className="py-2">
+                              <Link href={"/admin/life-plan/subject/" + s.id} className="text-emerald-400 hover:underline">Open</Link>
+                              <span className="mx-1 text-neutral-600">|</span>
+                              <Link href={"/admin/life-plan/subject/" + s.id + "#edit"} className="text-neutral-400 text-sm hover:underline">Edit</Link>
+                            </td>
                           </tr>
                         ))}
                       </tbody>

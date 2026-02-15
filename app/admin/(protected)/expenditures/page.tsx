@@ -7,9 +7,9 @@ export default async function AdminExpendituresPage(props: {
   searchParams: Promise<{ error?: string }> | { error?: string };
 }) {
   const params = typeof (props.searchParams as Promise<unknown>)?.then === "function"
-    ? await (props.searchParams as Promise<{ error?: string }>)
-    : (props.searchParams as { error?: string });
-  const { error } = params;
+    ? await (props.searchParams as Promise<{ error?: string; updated?: string }>)
+    : (props.searchParams as { error?: string; updated?: string });
+  const { error, updated } = params;
 
   let members: { id: string; email: string; firstName: string | null; lastName: string | null }[] = [];
   type ExpenditureWithMember = { id: string; memberId: string | null; description: string; amountCents: number; date: Date; notes: string | null; createdAt: Date; member: { firstName: string | null; lastName: string | null; email: string } | null };
@@ -47,6 +47,7 @@ export default async function AdminExpendituresPage(props: {
           </div>
         )}
         {error && <p className="text-amber-500 text-sm mb-4">Please fill required fields.</p>}
+        {updated && <p className="text-emerald-500 text-sm mb-4">Expenditure updated.</p>}
 
         <section className="mb-8">
           <h2 className="text-lg font-medium text-neutral-300 mb-3">Log expenditure</h2>
@@ -80,6 +81,7 @@ export default async function AdminExpendituresPage(props: {
                     <th className="py-2 pr-4">Date</th>
                     <th className="py-2 pr-4">Notes</th>
                     <th className="py-2 pr-4">Created</th>
+                    <th className="py-2 pr-4"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -91,6 +93,7 @@ export default async function AdminExpendituresPage(props: {
                       <td className="py-2 pr-4 text-neutral-400">{e.date.toLocaleDateString()}</td>
                       <td className="py-2 pr-4 text-neutral-400 max-w-[150px] truncate">{e.notes ?? "—"}</td>
                       <td className="py-2 pr-4 text-neutral-500 text-xs">{e.createdAt.toLocaleString()}</td>
+                      <td className="py-2 pr-4"><Link href={"/admin/expenditures/edit/" + e.id} className="text-neutral-400 text-sm hover:underline">Edit</Link></td>
                     </tr>
                   ))}
                 </tbody>

@@ -17,6 +17,7 @@ export function AdminDashboardClient() {
   const searchParams = useSearchParams();
   const filterCategory = searchParams.get("category") ?? undefined;
   const deleted = searchParams.get("deleted") ?? undefined;
+  const updated = searchParams.get("updated") ?? undefined;
   const errorParam = searchParams.get("error") ?? undefined;
 
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -101,6 +102,7 @@ export function AdminDashboardClient() {
         </header>
 
         {deleted && <p className="text-emerald-500 text-sm mb-4">Member deleted.</p>}
+        {updated && <p className="text-emerald-500 text-sm mb-4">Member updated.</p>}
         {errorParam === "delete" && <p className="text-amber-500 text-sm mb-4">Could not delete member (may have dependent data).</p>}
         {dbError && (
           <div className="text-amber-500 mb-6 space-y-2">
@@ -180,6 +182,7 @@ export function AdminDashboardClient() {
                   )}
                   <AddCategoryForm memberId={m.id} commonCategories={COMMON_CATEGORIES} existing={m.categories.map((c) => c.category)} />
                   <AddSubscriptionForm memberId={m.id} plans={plans} />
+                  <Link href={"/admin/members/" + m.id + "/edit"} className="text-neutral-400 text-sm hover:underline">Edit</Link>
                   <SetPasswordForm memberId={m.id} />
                   <DeleteMemberButton memberId={m.id} memberName={[m.firstName, m.lastName].filter(Boolean).join(" ") || m.email} />
                 </li>

@@ -5,9 +5,12 @@ import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-export default async function PortalPage() {
+export default async function PortalPage(props: { searchParams: Promise<{ updated?: string; error?: string }> | { updated?: string; error?: string } }) {
   const memberId = await getMemberIdFromCookie();
   if (!memberId) redirect("/login");
+  const params = typeof (props.searchParams as Promise<unknown>)?.then === "function"
+    ? await (props.searchParams as Promise<{ updated?: string; error?: string }>)
+    : (props.searchParams as { updated?: string; error?: string });
 
   const [member, subscriptions, invoices, subjectBusinesses] = await Promise.all([
     prisma.member.findUniqueOrThrow({
@@ -42,6 +45,9 @@ export default async function PortalPage() {
           </form>
         </header>
 
+        {params.updated && <p className="text-emerald-500 text-sm mb-4">Profile updated.</p>}
+        {params.error === "update" && <p className="text-amber-500 text-sm mb-4">Failed to update profile.</p>}
+
         <section className="mb-8">
           <h2 className="text-lg font-medium text-neutral-300 mb-3">Profile</h2>
           <div className="rounded-lg bg-neutral-900 p-4 space-y-2 text-sm">
@@ -53,6 +59,9 @@ export default async function PortalPage() {
               <p><span className="text-neutral-500">Address:</span> {[member.street, member.city, member.state, member.zip].filter(Boolean).join(", ")}</p>
             )}
           </div>
+          <p className="mt-2">
+            <Link href="/portal/profile/edit" className="text-emerald-400 text-sm hover:underline">Edit profile</Link>
+          </p>
         </section>
 
         <section className="mb-8">

@@ -14,12 +14,12 @@ type CommunicationWithMember = {
 };
 
 export default async function AdminCommunicationsPage(props: {
-  searchParams: Promise<{ error?: string; created?: string }> | { error?: string; created?: string };
+  searchParams: Promise<{ error?: string; created?: string; updated?: string }> | { error?: string; created?: string; updated?: string };
 }) {
   const params = typeof (props.searchParams as Promise<unknown>)?.then === "function"
-    ? await (props.searchParams as Promise<{ error?: string; created?: string }>)
-    : (props.searchParams as { error?: string; created?: string });
-  const { error, created } = params;
+    ? await (props.searchParams as Promise<{ error?: string; created?: string; updated?: string }>)
+    : (props.searchParams as { error?: string; created?: string; updated?: string });
+  const { error, created, updated } = params;
 
   let members: { id: string; email: string; firstName: string | null; lastName: string | null }[] = [];
   let communications: CommunicationWithMember[] = [];
@@ -59,6 +59,7 @@ export default async function AdminCommunicationsPage(props: {
         {error === "missing" && <p className="text-amber-500 text-sm mb-4">Member and subject are required.</p>}
         {error === "create" && <p className="text-amber-500 text-sm mb-4">Failed to log communication.</p>}
         {created && <p className="text-emerald-500 text-sm mb-4">Communication logged.</p>}
+        {updated && <p className="text-emerald-500 text-sm mb-4">Communication updated.</p>}
 
         <section className="mb-8">
           <h2 className="text-lg font-medium text-neutral-300 mb-3">Log communication</h2>
@@ -96,6 +97,7 @@ export default async function AdminCommunicationsPage(props: {
                     <th className="py-2 pr-4">Subject</th>
                     <th className="py-2 pr-4">Notes</th>
                     <th className="py-2 pr-4">Created</th>
+                    <th className="py-2 pr-4"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -106,6 +108,7 @@ export default async function AdminCommunicationsPage(props: {
                       <td className="py-2 pr-4">{c.subject ?? "—"}</td>
                       <td className="py-2 pr-4 text-neutral-400 max-w-[200px] truncate">{c.notes ?? "—"}</td>
                       <td className="py-2 pr-4 text-neutral-500 text-xs">{c.createdAt.toLocaleString()}</td>
+                      <td className="py-2 pr-4"><Link href={"/admin/communications/edit/" + c.id} className="text-neutral-400 text-sm hover:underline">Edit</Link></td>
                     </tr>
                   ))}
                 </tbody>
