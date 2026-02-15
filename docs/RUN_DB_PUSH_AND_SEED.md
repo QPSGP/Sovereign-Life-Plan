@@ -19,7 +19,7 @@ When you add new columns or tables, run the workflow so the database is updated.
 5. Wait until the run appears at the top and shows a **green checkmark** (about 1–2 minutes).  
    - If it fails (red X), open the run, click the **“db”** job, and check the log for errors.
 
-**If you don't see "Run workflow":** (1) Click **"DB push and seed"** in the left sidebar—the button appears **above the list of past runs** on the right, not in a separate box. (2) You need write access to the repo; otherwise an admin must run it. (3) The workflow must exist on the **main** branch (it does in this repo).
+**If you don't see "Run workflow":** (1) **Log in to GitHub**—the button only appears when you're signed in (you can be on the repo but logged out). (2) Click **"DB push and seed"** in the left sidebar—the button appears **above the list of past runs** on the right. (3) You need write access to the repo; otherwise an admin must run it.
 
 After it succeeds, your database has the latest schema (e.g. the `passwordHash` column on `members`). You do **not** need to add secrets again if `DATABASE_URL` is already set.
 
