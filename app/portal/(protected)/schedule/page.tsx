@@ -74,8 +74,7 @@ export default async function PortalSchedulePage() {
   });
 
   const byType = groupByType(rows);
-  const sectionOrder = [...MOVEMENT_TYPE_ORDER];
-  if (byType.has("Other")) sectionOrder.push("Other");
+  const sectionOrder: string[] = byType.has("Other") ? [...MOVEMENT_TYPE_ORDER, "Other"] : [...MOVEMENT_TYPE_ORDER];
 
   return (
     <main className="min-h-screen bg-neutral-950 text-neutral-100 p-6 print:bg-white print:text-black">
