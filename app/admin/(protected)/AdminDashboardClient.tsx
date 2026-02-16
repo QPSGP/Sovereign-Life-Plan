@@ -10,7 +10,7 @@ import { SubscriptionList } from "./SubscriptionList";
 const COMMON_CATEGORIES = ["Personal", "MMPE4", "Agency", "Public"];
 
 type Plan = { id: string; name: string; slug: string; amountCents: number; interval: string };
-type Member = { id: string; email: string; firstName: string | null; lastName: string | null; company: string | null; categories: { category: string }[] };
+type Member = { id: string; email: string; firstName: string | null; lastName: string | null; company: string | null; categories: { category: string }[]; lifePlanSubjectId: string | null };
 type Sub = { id: string; status: string; memberId: string; subscriptionPlanId: string; member: { email: string; firstName: string | null; lastName: string | null }; plan: { name: string } };
 
 export function AdminDashboardClient() {
@@ -182,6 +182,9 @@ export function AdminDashboardClient() {
                   )}
                   <AddCategoryForm memberId={m.id} commonCategories={COMMON_CATEGORIES} existing={m.categories.map((c) => c.category)} />
                   <AddSubscriptionForm memberId={m.id} plans={plans} />
+                  {m.lifePlanSubjectId && (
+                    <Link href={"/admin/life-plan/subject/" + m.lifePlanSubjectId} className="text-emerald-400 text-sm hover:underline">View life plan</Link>
+                  )}
                   <Link href={"/admin/members/" + m.id + "/edit"} className="text-neutral-400 text-sm hover:underline">Edit</Link>
                   <SetPasswordForm memberId={m.id} />
                   <DeleteMemberButton memberId={m.id} memberName={[m.firstName, m.lastName].filter(Boolean).join(" ") || m.email} />

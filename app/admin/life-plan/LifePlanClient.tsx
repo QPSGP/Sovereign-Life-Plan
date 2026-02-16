@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 
 type User = { id: string; email: string; firstName: string | null; lastName: string | null };
 type Subject = { id: string; name: string; verb?: string | null; noun?: string | null; object?: string | null; objective?: string | null };
+type MemberWithPlan = { subjectId: string; subjectName: string; memberId: string; memberName: string; memberEmail: string };
 
 export function LifePlanClient() {
   const searchParams = useSearchParams();
@@ -14,6 +15,7 @@ export function LifePlanClient() {
 
   const [users, setUsers] = useState<User[]>([]);
   const [subjectBusinesses, setSubjectBusinesses] = useState<Subject[]>([]);
+  const [membersWithPlans, setMembersWithPlans] = useState<MemberWithPlan[]>([]);
   const [dbError, setDbError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -28,9 +30,11 @@ export function LifePlanClient() {
           setDbError(data.error);
           setUsers(data.users ?? []);
           setSubjectBusinesses(data.subjectBusinesses ?? []);
+          setMembersWithPlans(data.membersWithPlans ?? []);
         } else {
           setUsers(data.users ?? []);
           setSubjectBusinesses(data.subjectBusinesses ?? []);
+          setMembersWithPlans(data.membersWithPlans ?? []);
         }
       })
       .catch((e) => {
@@ -66,6 +70,29 @@ export function LifePlanClient() {
 
         {error === "missing" && <p className="text-amber-500 text-sm mb-4">Name and user are required.</p>}
         {error === "create" && <p className="text-amber-500 text-sm mb-4">Failed to create.</p>}
+
+        {membersWithPlans.length > 0 && (
+          <section className="mb-6">
+            <h2 className="text-lg font-medium text-neutral-300 mb-2">View plan for member</h2>
+            <p className="text-neutral-500 text-sm mb-2">Jump to a member&apos;s life plan (Demo Personal, Demo Business, etc.).</p>
+            <select
+              defaultValue=""
+              onChange={(e) => {
+                const subjectId = e.target.value;
+                if (subjectId) window.location.href = "/admin/life-plan/subject/" + subjectId;
+              }}
+              className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700 min-w-[280px]"
+            >
+              <option value="">Select member…</option>
+              {membersWithPlans.map((m) => (
+                <option key={m.memberId} value={m.subjectId}>
+                  {m.memberName || m.memberEmail} — {m.subjectName}
+                </option>
+              ))}
+            </select>
+          </section>
+        )}
+
         {dbError && (
           <div className="mb-4 p-4 rounded bg-red-950/50 border border-red-800 text-red-200 text-sm">
             <p className="font-medium">Database error</p>
@@ -81,6 +108,7 @@ export function LifePlanClient() {
 
         <section className="mb-8">
           <h2 className="text-lg font-medium text-neutral-300 mb-3">User (plan owner)</h2>
+          <p className="text-neutral-500 text-sm mb-2">Plan owners are <strong>staff users</strong> (e.g. admin). To view a <strong>member</strong>&apos;s plan, use &quot;View plan for member&quot; above.</p>
           {users.length === 0 ? (
             <div className="text-neutral-300 space-y-2">
               <p className="text-neutral-500 text-sm">No plan owners yet. Life Plan uses <strong>Users</strong> (not Members) as plan owners.</p>
