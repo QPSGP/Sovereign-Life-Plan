@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-/** GET /api/reports/physical-movements — Report of all (or completed) physical movements (query-style). format=json|csv, done=all|yes|no */
+/** GET /api/reports/physical-movements — Report of all (or completed) physical movements from the PM table / life plan. format=json|csv, done=all|yes|no */
 export async function GET(req: NextRequest) {
   const format = req.nextUrl.searchParams.get("format") || "csv";
   const doneFilter = req.nextUrl.searchParams.get("done") || "all"; // all | yes | no
