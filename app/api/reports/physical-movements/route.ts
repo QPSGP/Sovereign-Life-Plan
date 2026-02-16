@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
     "Done date",
     "Sort",
   ];
-  const escape = (s: string) => `"${String(s).replace(/"/g, '""')}"`;
+  const escape = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
   const csvRows = rows.map((r) =>
     [
       r.subjectName,
