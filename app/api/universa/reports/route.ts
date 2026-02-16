@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { verifyAdminCookie } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
   const recordedTo = searchParams.get("recordedTo")?.trim() || undefined;
   const nameSearch = searchParams.get("name")?.trim() || undefined;
 
-  const where: { recordedAt?: { gte?: Date; lte?: Date }; grantees?: { name?: { contains: string; mode: "insensitive" } }; grantors?: { name?: { contains: string; mode: "insensitive" } } } = {};
+  const where: Prisma.UniversaDocumentWhereInput = {};
   if (recordedFrom || recordedTo) {
     where.recordedAt = {};
     if (recordedFrom) where.recordedAt.gte = new Date(recordedFrom);
