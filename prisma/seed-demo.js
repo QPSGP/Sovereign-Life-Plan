@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 const DEMO_MEMBER_EMAIL = "demo@sovereign-life-plan.local";
 
 async function main() {
-  const existing = await prisma.member.findUnique({ where: { email: DEMO_MEMBER_EMAIL } });
+  const existing = await prisma.member.findFirst({ where: { email: DEMO_MEMBER_EMAIL } });
   if (existing) {
     console.log("Demo data already present (member " + DEMO_MEMBER_EMAIL + " exists). Skipping.");
     return;
