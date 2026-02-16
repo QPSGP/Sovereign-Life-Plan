@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { MOVEMENT_TYPES } from "@/lib/movement-types";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,15 @@ export default async function MovementEditPage({
         {error && <p className="text-amber-500 text-sm mb-4">Verb is required.</p>}
 
         <form action={"/api/life-plan/physical-movement/" + id} method="POST" className="rounded bg-neutral-900 p-4 space-y-2">
+          <div>
+            <label className="block text-sm text-neutral-400 mb-1">Type (miniday category)</label>
+            <select name="movementType" defaultValue={movement.movementType ?? ""} className="w-full rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700">
+              <option value="">—</option>
+              {MOVEMENT_TYPES.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
           <div className="grid grid-cols-3 gap-2">
             <input type="text" name="verb" placeholder="Verb (required)" required defaultValue={movement.verb ?? ""} className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
             <input type="text" name="noun" placeholder="Noun" defaultValue={movement.noun ?? ""} className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />

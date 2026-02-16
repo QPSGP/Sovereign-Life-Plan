@@ -86,6 +86,7 @@ model AreaOfResponsibility {
 model PhysicalMovement {
   id                     String    @id @default(cuid())
   areaOfResponsibilityId String
+  movementType           String?   // Go To, Read, Think, Write, Call, Operation, Arithmetic, Design/Art, Health
   verb                   String?   // e.g. use, create
   noun                   String?
   object                 String?   // or description

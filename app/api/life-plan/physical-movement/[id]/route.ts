@@ -10,6 +10,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const object = (formData.get("object") as string)?.trim() || null;
   const objective = (formData.get("objective") as string)?.trim() || null;
   const results = (formData.get("results") as string)?.trim() || null;
+  const movementType = (formData.get("movementType") as string)?.trim() || null;
   const origin = req.nextUrl.origin;
   if (!verb) {
     const m = await prisma.physicalMovement.findUnique({ where: { id }, select: { areaOfResponsibilityId: true } });
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   try {
     const updated = await prisma.physicalMovement.update({
       where: { id },
-      data: { verb, noun, object, objective, results },
+      data: { movementType, verb, noun, object, objective, results },
       select: { areaOfResponsibilityId: true },
     });
     return NextResponse.redirect(new URL("/admin/life-plan/responsibility/" + updated.areaOfResponsibilityId, origin));

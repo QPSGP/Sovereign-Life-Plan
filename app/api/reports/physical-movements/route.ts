@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { sortByMovementType } from "@/lib/movement-types";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ export async function GET(req: NextRequest) {
     const purpose = m.areaOfResponsibility.areaOfPurpose;
     const resp = m.areaOfResponsibility;
     return {
+      movementType: m.movementType ?? "",
       subjectName: sub.name,
       subjectOwner: [sub.user.firstName, sub.user.lastName].filter(Boolean).join(" ") || sub.user.email,
       areaOfPurpose: purpose.name,
@@ -46,11 +48,14 @@ export async function GET(req: NextRequest) {
     };
   });
 
+  const sortedRows = sortByMovementType(rows, (r) => r.movementType || null);
+
   if (format === "json") {
-    return NextResponse.json({ report: "Report of all physical movements", rows });
+    return NextResponse.json({ report: "Report of all physical movements", rows: sortedRows });
   }
 
   const headers = [
+    "Type",
     "Subject",
     "Owner",
     "Area of purpose",
@@ -65,8 +70,9 @@ export async function GET(req: NextRequest) {
     "Sort",
   ];
   const escape = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
-  const csvRows = rows.map((r) =>
+  const csvRows = sortedRows.map((r) =>
     [
+      r.movementType,
       r.subjectName,
       r.subjectOwner,
       r.areaOfPurpose,

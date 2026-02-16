@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { MOVEMENT_TYPES } from "@/lib/movement-types";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,15 @@ export default async function ResponsibilityPage({
         <h2 className="text-lg font-medium text-neutral-300 mb-3">Physical movements</h2>
         <form action="/api/life-plan/physical-movement" method="POST" className="rounded bg-neutral-900 p-4 mb-6 space-y-2">
           <input type="hidden" name="areaOfResponsibilityId" value={areaOfResponsibilityId} />
+          <div>
+            <label className="block text-sm text-neutral-400 mb-1">Type (miniday category)</label>
+            <select name="movementType" className="w-full rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700">
+              <option value="">—</option>
+              {MOVEMENT_TYPES.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
           <div className="grid grid-cols-3 gap-2">
             <input type="text" name="verb" placeholder="Verb (required)" required className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
             <input type="text" name="noun" placeholder="Noun" className="rounded bg-neutral-800 px-3 py-2 text-white border border-neutral-700" />
@@ -63,6 +73,7 @@ export default async function ResponsibilityPage({
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="text-left text-neutral-400 border-b border-neutral-700">
+                <th className="py-2 pr-4">Type</th>
                 <th className="py-2 pr-4">Verb</th>
                 <th className="py-2 pr-4">Noun</th>
                 <th className="py-2 pr-4">Object</th>
@@ -75,6 +86,7 @@ export default async function ResponsibilityPage({
             <tbody>
               {responsibility.physicalMovements.map((m) => (
                 <tr key={m.id} className={`border-b border-neutral-800 ${m.done ? "opacity-70" : ""}`}>
+                  <td className="py-2 pr-4 text-neutral-400">{m.movementType ?? "—"}</td>
                   <td className="py-2 pr-4">{m.verb ?? "—"}</td>
                   <td className="py-2 pr-4">{m.noun ?? "—"}</td>
                   <td className="py-2 pr-4">{m.object ?? "—"}</td>

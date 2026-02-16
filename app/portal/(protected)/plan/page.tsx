@@ -20,7 +20,10 @@ export default async function PortalPlanPage() {
       <div className="max-w-2xl mx-auto">
         <header className="flex items-center justify-between border-b border-neutral-800 pb-4 mb-6">
           <h1 className="text-2xl font-semibold">My plan</h1>
-          <Link href="/portal" className="text-neutral-400 hover:text-white text-sm">← My account</Link>
+          <div className="flex items-center gap-3">
+            <Link href="/portal/schedule" className="text-emerald-400 hover:text-white text-sm">Miniday schedule</Link>
+            <Link href="/portal" className="text-neutral-400 hover:text-white text-sm">← My account</Link>
+          </div>
         </header>
 
         {subjects.length === 0 ? (

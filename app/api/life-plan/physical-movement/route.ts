@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
   const object = (formData.get("object") as string)?.trim() || null;
   const objective = (formData.get("objective") as string)?.trim() || null;
   const results = (formData.get("results") as string)?.trim() || null;
+  const movementType = (formData.get("movementType") as string)?.trim() || null;
   const origin = new URL(req.url).origin;
   if (!areaOfResponsibilityId) {
     return NextResponse.redirect(new URL("/admin/life-plan?error=missing", origin));
@@ -20,6 +21,7 @@ export async function POST(req: NextRequest) {
     await prisma.physicalMovement.create({
       data: {
         areaOfResponsibilityId,
+        movementType,
         verb,
         noun,
         object,

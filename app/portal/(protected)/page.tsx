@@ -65,6 +65,12 @@ export default async function PortalPage(props: { searchParams: Promise<{ update
         </section>
 
         <section className="mb-8">
+          <h2 className="text-lg font-medium text-neutral-300 mb-3">My miniday schedule</h2>
+          <p className="text-neutral-500 text-sm mb-2">View and print all activities from your life plan.</p>
+          <Link href="/portal/schedule" className="inline-block rounded bg-emerald-700 px-4 py-2 text-sm text-white hover:bg-emerald-600">View schedule →</Link>
+        </section>
+
+        <section className="mb-8">
           <h2 className="text-lg font-medium text-neutral-300 mb-3">My subscription(s)</h2>
           {subscriptions.length === 0 ? (
             <p className="text-neutral-500 text-sm">No active subscription.</p>
