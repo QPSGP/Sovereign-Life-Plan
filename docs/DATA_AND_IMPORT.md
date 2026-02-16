@@ -25,18 +25,21 @@ You can fill the app with **sample data** so you can click around and see lists,
 
 **What the demo seed creates (idempotent — safe to run once):**
 
-- One **demo member**: `demo@sovereign-life-plan.local` / `demo1234`, with category “Personal”
-- An **active subscription** (SOVEREIGN: Personal) for that member
-- A **Life Plan** owned by the default user and **linked to the demo member** (so “My plan” in the portal has content): one Subject/Business → one Area of Purpose → one Area of Responsibility → one Physical Movement (with verb/noun/object/objective)
-- Two **communications** (call, email) for the demo member
-- Two **chores** (titles + descriptions)
-- One **expenditure** (description, amount, date, notes)
-- One **invoice** for the demo member with one **partial payment**
+- **Two demo members** with a **full month of sample data** each:
+  - **Demo Personal** — `demo@sovereign-life-plan.local` / `demo1234` — category “Personal”, SOVEREIGN: Personal. Life plan: Health & energy, Family & relationships, Learning & growth (with responsibilities and movements; some done).
+  - **Demo Business** — `demo-business@sovereign-life-plan.local` / `fact4567` — categories “Agency” + “MMPE4”, SOVEREIGN: Business. Life plan: Client delivery, Team & operations, Marketing & outreach (with responsibilities and movements; some done).
+- **Communications**: ~12 per member over 30 days (calls, emails, mailouts).
+- **Expenditures**: ~10 per member over the month.
+- **Invoices**: multiple per member (paid, open, past_due, partial payments).
+- **Orders**: 4 per member with order lines (subscriptions and one-time).
+- **Chores**: 7 total (4 done, 3 open), spread over the month.
+
+To **refresh** demo data (e.g. after changing the seed): delete both demo members in admin, then run `npm run db:seed:demo` again.
 
 After running it, you can:
 
 - Use **admin** to see members, plans, communications, chores, expenditures, invoices, and the life plan.
-- Log in to the **portal** as `demo@sovereign-life-plan.local` / `demo1234` to see profile, subscription, invoices, and “My plan” with the demo subject/purpose/responsibility/movement.
+- Log in to the **portal** as **Demo Personal** (`demo@sovereign-life-plan.local` / `demo1234`) or **Demo Business** (`demo-business@sovereign-life-plan.local` / `fact4567`) to see profile, subscription, invoices, and “My plan” with the full demo content.
 
 ---
 
