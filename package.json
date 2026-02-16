@@ -12,7 +12,8 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "node --env-file=.env prisma/seed.js",
-    "db:seed:demo": "node --env-file=.env prisma/seed-demo.js"
+    "db:seed:demo": "node --env-file=.env prisma/seed-demo.js",
+    "db:import:universa": "node --env-file=.env scripts/import-universa-csv.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

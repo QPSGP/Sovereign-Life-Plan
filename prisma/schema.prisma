@@ -318,3 +318,114 @@ model Chore {
 
   @@map("chores")
 }
+
+// ----- UNIVERSA (business demo): documents, grantors, grantees -----
+// Legacy: GRANTDEE, GRANTORS, GRANTEES, PER_ID, PERALIAS
+
+model UniversaDocument {
+  id                  String   @id @default(cuid())
+  docNumber            String   @unique // Doc. #
+  documentNumberAlt    String?  // Document Number (alternate)
+  recordedAt           DateTime?
+  documentTitle        String?
+  recReqBy             String?
+  sendTo               String?
+  sendAdrs             String?
+  sendAdrs2            String?
+  sendTaxTo            String?
+  sendTaxAdrs          String?
+  sendTaxAdrs2         String?
+  considerationAmt     String?  // decimal as string for legacy compatibility
+  considerationOther   String?
+  propertyCounty       String?
+  lot                  String?
+  block                String?
+  tract                String?
+  book                 String?
+  pages                String?
+  parcelNumber         String?
+  propertyAdrs         String?
+  propertyAdrs2        String?
+  propertyAdrs3        String?
+  notaryName           String?
+  notarizationDate     DateTime?
+  comments             String?  @db.Text
+  signedBy             String?
+  signerTitle          String?
+  dateSigned           DateTime?
+  signedBy2            String?
+  signer2Title         String?
+  signedBy3            String?
+  signer3Title         String?
+  numberOfPages       Int?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  grantors  UniversaDocumentGrantor[]
+  grantees  UniversaDocumentGrantee[]
+
+  @@map("universa_documents")
+}
+
+model UniversaDocumentGrantor {
+  id             String   @id @default(cuid())
+  documentId      String
+  grantorNumber  String?  // Grantor#
+  name           String?
+  address        String?  @db.Text
+  address2        String?
+  address3        String?
+  percentShare   String?  // %
+  comment        String?  @db.Text
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  document UniversaDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@map("universa_document_grantors")
+}
+
+model UniversaDocumentGrantee {
+  id             String   @id @default(cuid())
+  documentId      String
+  granteeNumber  String?  // Grantee #
+  name           String?
+  address        String?  @db.Text
+  address2        String?
+  address3        String?
+  percentShare   String?  // %
+  comment        String?  @db.Text
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  document UniversaDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@map("universa_document_grantees")
+}
+
+model UniversaPerson {
+  id          String   @id @default(cuid())
+  personalId   String?  @unique // Personal ID (legacy)
+  lastName    String?
+  firstName   String?
+  middle      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  aliases UniversaPersonAlias[]
+
+  @@map("universa_persons")
+}
+
+model UniversaPersonAlias {
+  id           String   @id @default(cuid())
+  personId     String
+  aliasIdNum   String?  // Alias ID NUM
+  createdAt    DateTime @default(now())
+
+  person UniversaPerson @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@map("universa_person_aliases")
+}
